@@ -1,6 +1,7 @@
 // Shader.cpp
 #include "stdafx.h"
 #include "Shader.h"
+#include "Player.h"
 
 CShader::CShader()
 {
@@ -461,4 +462,28 @@ void CObjectsShader::BuildFloorMap()
 	};
 
 	memcpy(m_Floor, floor, sizeof(floor));
+}
+
+// 충돌 검사 함수
+bool CObjectsShader::CheckObjectCollision(CPlayer* pPlayer)
+{
+	if (!pPlayer) return false;
+	if (!pPlayer->HasBoundingBox()) return false;
+
+	BoundingBox playerBox = pPlayer->GetBoundingBox();
+
+	for (int i = 0; i < m_nObjects; i++)
+	{
+		if (!m_ppObjects[i]) continue;
+		if (!m_ppObjects[i]->HasBoundingBox()) continue;
+
+		BoundingBox objectBox = m_ppObjects[i]->GetBoundingBox();
+
+		if (playerBox.Intersects(objectBox))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

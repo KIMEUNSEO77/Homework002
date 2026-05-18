@@ -130,3 +130,9 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	return(pd3dGraphicsRootSignature);
 }
 
+bool CScene::CheckObjectCollision(CPlayer* pPlayer)
+{
+	if (!m_pShaders) return false;
+
+	return m_pShaders->CheckObjectCollision(pPlayer);
+}

@@ -101,6 +101,8 @@ public:
 	void BuildMazeMap();   // 미로 만들기
 	void BuildFloorMap();
 
+	bool CheckObjectCollision(CPlayer* pPlayer);  // 충돌 검사 함수
+
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리
 	int m_nObjects = 0;
