@@ -482,11 +482,7 @@ void CGameFramework::ProcessInput()
 
 		if (pKeyBuffer[VK_SPACE] & 0xF0)
 		{
-			m_pScene->ShootBullet(
-				m_pPlayer,
-				m_pd3dDevice,
-				m_pd3dCommandList
-			);
+			m_pScene->ShootBullet(m_pPlayer);
 		}
 	}
 

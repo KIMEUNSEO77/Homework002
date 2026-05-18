@@ -106,8 +106,13 @@ public:
 	float GetFloorHeight(float x, float z);       // 바닥 높이 함수
 
 	void BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList); // 적 생성
-	void ShootBullet(CPlayer* pPlayer, ID3D12Device* pd3dDevice,
-		ID3D12GraphicsCommandList* pd3dCommandList); // 총알 생성
+	void ShootBullet(CPlayer* pPlayer); // 총알 생성
+
+	CGameObject* m_pGun = NULL;
+	CCubeMeshDiffused* m_pBulletMesh = NULL;
+
+	void BuildGunAndBulletMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void UpdateGun(CPlayer* pPlayer);
 
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리

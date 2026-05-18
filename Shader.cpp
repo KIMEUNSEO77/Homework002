@@ -481,6 +481,8 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 	{
 		if (pBullet) pBullet->Animate(fTimeElapsed);
 	}
+
+	UpdateGun(pPlayer);
 }
 
 void CObjectsShader::ReleaseUploadBuffers()
@@ -508,6 +510,11 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	for (CBulletObject* pBullet : m_vBullets)
 	{
 		if (pBullet) pBullet->Render(pd3dCommandList, pCamera);
+	}
+
+	if (m_pGun)
+	{
+		m_pGun->Render(pd3dCommandList, pCamera);
 	}
 }
 
@@ -624,40 +631,62 @@ void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 		m_vEnemies.push_back(pEnemy);
 	}
+
+	BuildGunAndBulletMesh(pd3dDevice, pd3dCommandList);
 }
 
-void CObjectsShader::ShootBullet(
-	CPlayer* pPlayer,
-	ID3D12Device* pd3dDevice,
-	ID3D12GraphicsCommandList* pd3dCommandList)
+void CObjectsShader::ShootBullet(CPlayer* pPlayer)
 {
-	if (!pPlayer) return;
+	if (!pPlayer || !m_pBulletMesh) return;
 
 	CBulletObject* pBullet = new CBulletObject();
-
-	// ÃÑ¾Ë ¸Þ½¬
-	CCubeMeshDiffused* pBulletMesh = new CCubeMeshDiffused(
-		pd3dDevice,
-		pd3dCommandList,
-		10.0f, 10.0f, 10.0f,
-		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
-	);
-
-	pBullet->SetMesh(pBulletMesh);
+	pBullet->SetMesh(m_pBulletMesh);
 
 	XMFLOAT3 playerPos = pPlayer->GetPosition();
 	XMFLOAT3 look = pPlayer->GetLookVector();
 
-	// ÃÑ±¸ À§Ä¡
 	XMFLOAT3 bulletPos = XMFLOAT3(
-		playerPos.x + look.x * 50.0f,
-		playerPos.y + 20.0f,
-		playerPos.z + look.z * 50.0f
+		playerPos.x + look.x * 80.0f,
+		playerPos.y + 35.0f,
+		playerPos.z + look.z * 80.0f
 	);
 
 	pBullet->SetPosition(bulletPos);
-
 	pBullet->SetDirection(look);
 
 	m_vBullets.push_back(pBullet);
+}
+
+void CObjectsShader::BuildGunAndBulletMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CCubeMeshDiffused* pGunMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		20.0f, 20.0f, 50.0f,
+		XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f)
+	);
+
+	m_pGun = new CGameObject();
+	m_pGun->SetMesh(pGunMesh);
+
+	m_pBulletMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		10.0f, 10.0f, 10.0f,
+		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+	);
+}
+
+void CObjectsShader::UpdateGun(CPlayer* pPlayer)
+{
+	if (!pPlayer || !m_pGun) return;
+
+	XMFLOAT3 pos = pPlayer->GetPosition();
+	XMFLOAT3 look = pPlayer->GetLookVector();
+
+	XMFLOAT3 gunPos = XMFLOAT3(
+		pos.x + look.x * 55.0f,
+		pos.y + 35.0f,
+		pos.z + look.z * 55.0f
+	);
+
+	m_pGun->SetPosition(gunPos);
 }
