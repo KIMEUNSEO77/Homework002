@@ -434,7 +434,7 @@ CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	XMFLOAT3 xmf3Position = XMFLOAT3(150.0f, 60.0f, 150.0f);
 	SetPosition(xmf3Position);
 
-	SetBoundingBox(GetPosition(), XMFLOAT3(12.0f, 18.0f, 12.0f));
+	SetBoundingBox(GetPosition(), XMFLOAT3(14.0f, 18.0f, 14.0f));
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
@@ -454,7 +454,7 @@ CCamera* CCubePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	switch (nNewCameraMode)
 	{
 	case FIRST_PERSON_CAMERA:
-		SetFriction(200.0f);
+		SetFriction(8.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		SetMaxVelocityXZ(125.0f);
 		SetMaxVelocityY(0.0f);
@@ -468,7 +468,7 @@ CCamera* CCubePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		break;
 
 	case SPACESHIP_CAMERA:
-		SetFriction(125.0f);
+		SetFriction(8.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		SetMaxVelocityXZ(125.0f);
 		SetMaxVelocityY(0.0f);
@@ -482,7 +482,7 @@ CCamera* CCubePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		break;
 
 	case THIRD_PERSON_CAMERA:
-		SetFriction(250.0f);
+		SetFriction(8.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		SetMaxVelocityXZ(125.0f);
 		SetMaxVelocityY(0.0f);

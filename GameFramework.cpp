@@ -518,21 +518,38 @@ void CGameFramework::ProcessInput()
 		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다). 이동 거리는 시간에 비례하도록 한다.
 		플레이어의 이동 속력은 (50/초)로 가정한다.*/
 		//if (dwDirection) m_pPlayer->Move(dwDirection, 50.0f * m_GameTimer.GetTimeElapsed(), false);  // 임시로 false
+		XMFLOAT3 xmf3OldPosition = m_pPlayer->GetPosition();
+
 		if (dwDirection)
 		{
-			XMFLOAT3 xmf3OldPosition = m_pPlayer->GetPosition();
-
-			m_pPlayer->Move(dwDirection, 50.0f * m_GameTimer.GetTimeElapsed(), false);
-
-			if (m_pScene->CheckObjectCollision(m_pPlayer))
-			{
-				m_pPlayer->SetPosition(xmf3OldPosition);
-			}
+			m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
 		}
+
+		m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+
+		if (m_pScene->CheckObjectCollision(m_pPlayer))
+		{
+			XMFLOAT3 xmf3NewPosition = m_pPlayer->GetPosition();
+
+			m_pPlayer->Move(
+				XMFLOAT3(
+					xmf3OldPosition.x - xmf3NewPosition.x,
+					0.0f,
+					xmf3OldPosition.z - xmf3NewPosition.z
+				),
+				false
+			);
+
+			XMFLOAT3 v = m_pPlayer->GetVelocity();
+			v.x = 0.0f;
+			v.z = 0.0f;
+			m_pPlayer->SetVelocity(v);
+		}
+
 	}
 
 	// 플레이어를 실제로 이동하고 카메라를 갱신. 중력과 마찰력의 영향을 속도 벡터에 적용
-	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	//m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
 void CGameFramework::AnimateObjects()
