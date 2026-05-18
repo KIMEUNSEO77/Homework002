@@ -109,9 +109,12 @@ public:
 
 private:
 	float m_fMoveSpeed = 80.0f;
+	bool m_bDead = false;
 
 public:
 	void SetMoveSpeed(float fSpeed) { m_fMoveSpeed = fSpeed; }
+	void SetDead(bool bDead) { m_bDead = bDead; }
+	bool IsDead() { return m_bDead; }
 
 	//void MoveToPlayer(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed);
 	XMFLOAT3 GetMoveToPlayerVector(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed);
@@ -129,13 +132,16 @@ protected:
 	float m_fSpeed = 600.0f;
 	float m_fLifeTime = 3.0f;
 
+	bool m_bDead = false;
+
 public:
 	void SetDirection(XMFLOAT3 xmf3Direction)
 	{
 		m_xmf3Direction = xmf3Direction;
 	}
 
-	bool IsDead() { return (m_fLifeTime <= 0.0f); }
+	void SetDead(bool bDead) { m_bDead = bDead; }
+	bool IsDead() { return (m_fLifeTime <= 0.0f) || m_bDead; }
 
 	virtual void Animate(float fTimeElapsed);
 };

@@ -286,6 +286,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	// 도착 지점 메쉬 생성
 	CCubeMeshDiffused* pGoalMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f, 
 		XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+	// 파편 메쉬 생성
+	m_pFragmentMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 8.0f, 8.0f, 8.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 
 	float floorThickness = 20.0f;
 	float floorStepHeight = 20.0f;
@@ -482,6 +484,49 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 	{
 		if (pBullet) pBullet->Animate(fTimeElapsed);
 	}
+
+	// 총알, 적 충돌 검사
+	for (CBulletObject* pBullet : m_vBullets)
+	{
+		if (!pBullet || pBullet->IsDead()) continue;
+
+		for (CEnemyObject* pEnemy : m_vEnemies)
+		{
+			if (!pEnemy) continue;
+
+			if (pBullet->GetBoundingBox().Intersects(pEnemy->GetBoundingBox()))
+			{
+				CreateFragments(pEnemy->GetPosition());
+
+				pBullet->SetDead(true);
+				pEnemy->SetDead(true);
+
+				break;
+			}
+		}
+	}
+
+	for (CFragmentObject* pFragment : m_vFragments)
+	{
+		if (pFragment) pFragment->Animate(fTimeElapsed);
+	}
+
+	// 죽은 적 제거
+	m_vEnemies.erase(
+		std::remove_if(m_vEnemies.begin(), m_vEnemies.end(),
+			[](CEnemyObject* pEnemy)
+			{
+				if (pEnemy && pEnemy->IsDead())
+				{
+					delete pEnemy;
+					return true;
+				}
+				return false;
+			}),
+		m_vEnemies.end()
+	);
+
+	// 죽은 총알 제거
 	m_vBullets.erase(
 		std::remove_if(
 			m_vBullets.begin(),
@@ -498,6 +543,20 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 			}
 		),
 		m_vBullets.end()
+	);
+
+	m_vFragments.erase(
+		std::remove_if(m_vFragments.begin(), m_vFragments.end(),
+			[](CFragmentObject* pFragment)
+			{
+				if (pFragment && pFragment->IsDead())
+				{
+					delete pFragment;
+					return true;
+				}
+				return false;
+			}),
+		m_vFragments.end()
 	);
 
 	UpdateGun(pPlayer);
@@ -533,6 +592,11 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	if (m_pGun)
 	{
 		m_pGun->Render(pd3dCommandList, pCamera);
+	}
+
+	for (CFragmentObject* pFragment : m_vFragments)
+	{
+		if (pFragment) pFragment->Render(pd3dCommandList, pCamera);
 	}
 }
 
@@ -670,6 +734,7 @@ void CObjectsShader::ShootBullet(CPlayer* pPlayer)
 	);
 
 	pBullet->SetPosition(bulletPos);
+	pBullet->SetBoundingBox(bulletPos, XMFLOAT3(5.0f, 5.0f, 5.0f)); // 바운딩 박스
 	pBullet->SetDirection(look);
 
 	m_vBullets.push_back(pBullet);
@@ -708,4 +773,23 @@ void CObjectsShader::UpdateGun(CPlayer* pPlayer)
 
 	m_pGun->SetPosition(gunPos);
 	m_pGun->SetLookDirection(look);
+}
+
+// 파편 생성
+void CObjectsShader::CreateFragments(XMFLOAT3 pos)
+{
+	for (int i = 0; i < 12; i++)
+	{
+		CFragmentObject* pFragment = new CFragmentObject();
+		pFragment->SetMesh(m_pFragmentMesh);
+		pFragment->SetPosition(pos);
+
+		float vx = ((rand() % 200) - 100) * 1.5f;
+		float vy = (rand() % 150) + 50.0f;
+		float vz = ((rand() % 200) - 100) * 1.5f;
+
+		pFragment->SetVelocity(XMFLOAT3(vx, vy, vz));
+
+		m_vFragments.push_back(pFragment);
+	}
 }

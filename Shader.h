@@ -110,9 +110,12 @@ public:
 
 	CGameObject* m_pGun = NULL;
 	CCubeMeshDiffused* m_pBulletMesh = NULL;
+	CMesh* m_pFragmentMesh = NULL;
 
 	void BuildGunAndBulletMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void UpdateGun(CPlayer* pPlayer);
+
+	void CreateFragments(XMFLOAT3 pos);  // 파편 생성
 
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리
@@ -120,6 +123,7 @@ protected:
 
 	std::vector<CEnemyObject*> m_vEnemies;
 	std::vector<CBulletObject*> m_vBullets;
+	std::vector<CFragmentObject*> m_vFragments;
 
 	int m_Maze[MAZE_Z][MAZE_X];        // 미로 배열, 0이면 빈 공간, 1이면 벽
 	int m_Floor[MAZE_Z][MAZE_X];       // 바닥 배열
