@@ -118,7 +118,7 @@ public:
 	void UpdateGun(CPlayer* pPlayer);
 	void BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void SetResultObjectPosition(CPlayer* pPlayer);  // 게임 오버, 게임 클리어 메시지 위치 설정
-	void UpdateCrossHair(CPlayer* pPlayer);
+	void UpdateCrossHair(CCamera* pCamera);
 
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리

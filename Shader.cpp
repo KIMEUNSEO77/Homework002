@@ -563,7 +563,6 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 	);
 
 	UpdateGun(pPlayer);
-	UpdateCrossHair(pPlayer);
 }
 
 void CObjectsShader::ReleaseUploadBuffers()
@@ -623,13 +622,13 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		if (pFragment) pFragment->Render(pd3dCommandList, pCamera);
 	}
 
-	if (pCamera->GetMode() == FIRST_PERSON_CAMERA)
+	// 1인칭일 때만 Crosshair 갱신 + 렌더
+	if (pCamera && pCamera->GetMode() == FIRST_PERSON_CAMERA)
 	{
-		if (m_pCrossHairH)
-			m_pCrossHairH->Render(pd3dCommandList, pCamera);
+		UpdateCrossHair(pCamera);
 
-		if (m_pCrossHairV)
-			m_pCrossHairV->Render(pd3dCommandList, pCamera);
+		if (m_pCrossHairH) m_pCrossHairH->Render(pd3dCommandList, pCamera);
+		if (m_pCrossHairV) m_pCrossHairV->Render(pd3dCommandList, pCamera);
 	}
 }
 
@@ -948,22 +947,24 @@ void CObjectsShader::BuildCrossHair(
 }
 
 // 조준점 위치 업데이트
-void CObjectsShader::UpdateCrossHair(CPlayer* pPlayer)
+void CObjectsShader::UpdateCrossHair(CCamera* pCamera)
 {
-	if (!pPlayer || !m_pCrossHairH || !m_pCrossHairV) return;
+	if (!pCamera || !m_pCrossHairH || !m_pCrossHairV) return;
 
-	XMFLOAT3 pos = pPlayer->GetPosition();
-	XMFLOAT3 look = pPlayer->GetLookVector();
+	XMFLOAT3 camPos = pCamera->GetPosition();
+	XMFLOAT3 camLook = pCamera->GetLookVector();
+
+	float distance = 120.0f;
 
 	XMFLOAT3 crossPos = XMFLOAT3(
-		pos.x + look.x * 120.0f,
-		pos.y + 30.0f,
-		pos.z + look.z * 120.0f
+		camPos.x + camLook.x * distance,
+		camPos.y + camLook.y * distance,
+		camPos.z + camLook.z * distance
 	);
 
 	m_pCrossHairH->SetPosition(crossPos);
 	m_pCrossHairV->SetPosition(crossPos);
 
-	m_pCrossHairH->SetLookDirection(look);
-	m_pCrossHairV->SetLookDirection(look);
+	m_pCrossHairH->SetLookDirection(camLook);
+	m_pCrossHairV->SetLookDirection(camLook);
 }
