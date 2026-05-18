@@ -102,7 +102,7 @@ public:
 	void BuildMazeMap();   // 미로 만들기
 	void BuildFloorMap();
 
-	bool CheckObjectCollision(CPlayer* pPlayer);  // 충돌 검사 함수
+	bool CheckObjectCollision(CGameObject* pObject);  // 충돌 검사 함수
 	float GetFloorHeight(float x, float z);       // 바닥 높이 함수
 
 	void BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

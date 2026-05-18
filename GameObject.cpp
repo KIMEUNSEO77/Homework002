@@ -183,6 +183,7 @@ CEnemyObject::~CEnemyObject()
 {
 }
 
+/*
 // 플레이어에게 이동
 void CEnemyObject::MoveToPlayer(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed)
 {
@@ -210,4 +211,35 @@ void CEnemyObject::MoveToPlayer(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed)
 			xmf3Position.z + xmf3Direction.z * m_fMoveSpeed * fTimeElapsed
 		);
 	}
+}
+*/
+
+XMFLOAT3 CEnemyObject::GetMoveToPlayerVector(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed)
+{
+	XMFLOAT3 xmf3Position = GetPosition();
+
+	XMFLOAT3 xmf3Direction = XMFLOAT3(
+		xmf3PlayerPosition.x - xmf3Position.x,
+		0.0f,
+		xmf3PlayerPosition.z - xmf3Position.z
+	);
+
+	float fLength = sqrtf(
+		xmf3Direction.x * xmf3Direction.x +
+		xmf3Direction.z * xmf3Direction.z
+	);
+
+	if (fLength <= 1.0f)
+	{
+		return XMFLOAT3(0.0f, 0.0f, 0.0f);
+	}
+
+	xmf3Direction.x /= fLength;
+	xmf3Direction.z /= fLength;
+
+	return XMFLOAT3(
+		xmf3Direction.x * m_fMoveSpeed * fTimeElapsed,
+		0.0f,
+		xmf3Direction.z * m_fMoveSpeed * fTimeElapsed
+	);
 }

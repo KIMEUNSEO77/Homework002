@@ -111,5 +111,6 @@ private:
 public:
 	void SetMoveSpeed(float fSpeed) { m_fMoveSpeed = fSpeed; }
 
-	void MoveToPlayer(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed);
+	//void MoveToPlayer(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed);
+	XMFLOAT3 GetMoveToPlayerVector(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed);
 };

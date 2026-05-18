@@ -130,11 +130,11 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	return(pd3dGraphicsRootSignature);
 }
 
-bool CScene::CheckObjectCollision(CPlayer* pPlayer)
+bool CScene::CheckObjectCollision(CGameObject* pObject)
 {
 	if (!m_pShaders) return false;
 
-	return m_pShaders->CheckObjectCollision(pPlayer);
+	return m_pShaders->CheckObjectCollision(pObject);
 }
 
 float CScene::GetFloorHeight(float x, float z)

@@ -27,7 +27,7 @@ public:
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ID3D12RootSignature* GetGraphicsRootSignature();
 
-	bool CheckObjectCollision(CPlayer* pPlayer);
+	bool CheckObjectCollision(CGameObject* pObject);
 	float GetFloorHeight(float x, float z);  // 바닥 높이 함수
 
 protected:	

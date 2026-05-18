@@ -412,15 +412,48 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 		m_ppObjects[j]->Animate(fTimeElapsed);
 	}
 
+	// 적 이동
 	if (pPlayer)
 	{
 		XMFLOAT3 playerPos = pPlayer->GetPosition();
 
 		for (CEnemyObject* pEnemy : m_vEnemies)
 		{
-			if (pEnemy)
+			if (!pEnemy) continue;
+
+			// 적이 이동하고 싶은 방향 벡터 계산
+			XMFLOAT3 move = pEnemy->GetMoveToPlayerVector(playerPos, fTimeElapsed);
+
+			XMFLOAT3 oldPos = pEnemy->GetPosition();
+
+			// -------------------------
+			// X축 이동
+			// -------------------------
+			pEnemy->SetPosition(
+				oldPos.x + move.x,
+				oldPos.y,
+				oldPos.z
+			);
+
+			if (CheckObjectCollision(pEnemy))
 			{
-				pEnemy->MoveToPlayer(playerPos, fTimeElapsed);
+				pEnemy->SetPosition(oldPos);
+			}
+
+			// -------------------------
+			// Z축 이동
+			// -------------------------
+			oldPos = pEnemy->GetPosition();
+
+			pEnemy->SetPosition(
+				oldPos.x,
+				oldPos.y,
+				oldPos.z + move.z
+			);
+
+			if (CheckObjectCollision(pEnemy))
+			{
+				pEnemy->SetPosition(oldPos);
 			}
 		}
 	}
@@ -493,21 +526,21 @@ void CObjectsShader::BuildFloorMap()
 }
 
 // 충돌 검사 함수
-bool CObjectsShader::CheckObjectCollision(CPlayer* pPlayer)
+bool CObjectsShader::CheckObjectCollision(CGameObject* pObject)
 {
-	if (!pPlayer) return false;
-	if (!pPlayer->HasBoundingBox()) return false;
+	if (!pObject) return false;
+	if (!pObject->HasBoundingBox()) return false;
 
-	BoundingBox playerBox = pPlayer->GetBoundingBox();
+	BoundingBox objectBox = pObject->GetBoundingBox();
 
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		if (!m_ppObjects[i]) continue;
 		if (!m_ppObjects[i]->HasBoundingBox()) continue;
 
-		BoundingBox objectBox = m_ppObjects[i]->GetBoundingBox();
+		BoundingBox wallBox = m_ppObjects[i]->GetBoundingBox();
 
-		if (playerBox.Intersects(objectBox))
+		if (objectBox.Intersects(wallBox))
 		{
 			return true;
 		}
