@@ -299,6 +299,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	BuildMazeMap();   // 미로 생성
 	BuildFloorMap();  // 바닥 생성
 	BuildEnemies(pd3dDevice, pd3dCommandList); // 적 생성
+	BuildCrossHair(pd3dDevice, pd3dCommandList); // 조준점 생성
 
 	const int wallHeight = 3;
 
@@ -562,6 +563,7 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 	);
 
 	UpdateGun(pPlayer);
+	UpdateCrossHair(pPlayer);
 }
 
 void CObjectsShader::ReleaseUploadBuffers()
@@ -619,6 +621,15 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	for (CFragmentObject* pFragment : m_vFragments)
 	{
 		if (pFragment) pFragment->Render(pd3dCommandList, pCamera);
+	}
+
+	if (pCamera->GetMode() == FIRST_PERSON_CAMERA)
+	{
+		if (m_pCrossHairH)
+			m_pCrossHairH->Render(pd3dCommandList, pCamera);
+
+		if (m_pCrossHairV)
+			m_pCrossHairV->Render(pd3dCommandList, pCamera);
 	}
 }
 
@@ -909,4 +920,50 @@ void CObjectsShader::SetResultObjectPosition(CPlayer* pPlayer)
 	{
 		if (pObject) pObject->SetPosition(resultPos);
 	}
+}
+
+void CObjectsShader::BuildCrossHair(
+	ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CCubeMeshDiffused* pHMesh = new CCubeMeshDiffused(
+		pd3dDevice,
+		pd3dCommandList,
+		20.0f, 2.0f, 2.0f,
+		XMFLOAT4(1.0f, 0.8f, 0.9f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pVMesh = new CCubeMeshDiffused(
+		pd3dDevice,
+		pd3dCommandList,
+		2.0f, 20.0f, 2.0f,
+		XMFLOAT4(1.0f, 0.8f, 0.9f, 1.0f)
+	);
+
+	m_pCrossHairH = new CGameObject();
+	m_pCrossHairH->SetMesh(pHMesh);
+
+	m_pCrossHairV = new CGameObject();
+	m_pCrossHairV->SetMesh(pVMesh);
+}
+
+// 조준점 위치 업데이트
+void CObjectsShader::UpdateCrossHair(CPlayer* pPlayer)
+{
+	if (!pPlayer || !m_pCrossHairH || !m_pCrossHairV) return;
+
+	XMFLOAT3 pos = pPlayer->GetPosition();
+	XMFLOAT3 look = pPlayer->GetLookVector();
+
+	XMFLOAT3 crossPos = XMFLOAT3(
+		pos.x + look.x * 120.0f,
+		pos.y + 30.0f,
+		pos.z + look.z * 120.0f
+	);
+
+	m_pCrossHairH->SetPosition(crossPos);
+	m_pCrossHairV->SetPosition(crossPos);
+
+	m_pCrossHairH->SetLookDirection(look);
+	m_pCrossHairV->SetLookDirection(look);
 }

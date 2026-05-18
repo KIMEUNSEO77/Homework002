@@ -112,11 +112,13 @@ public:
 	void BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList); // 적 생성
 	void ShootBullet(CPlayer* pPlayer); // 총알 생성
 	void CreateFragments(XMFLOAT3 pos);  // 파편 생성
+	void BuildCrossHair(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);   // 조준점 생성
 
 	void BuildGunAndBulletMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void UpdateGun(CPlayer* pPlayer);
 	void BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void SetResultObjectPosition(CPlayer* pPlayer);  // 게임 오버, 게임 클리어 메시지 위치 설정
+	void UpdateCrossHair(CPlayer* pPlayer);
 
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리
@@ -125,6 +127,9 @@ protected:
 	CGameObject* m_pGun = NULL;
 	CCubeMeshDiffused* m_pBulletMesh = NULL;
 	CMesh* m_pFragmentMesh = NULL;
+
+	CGameObject* m_pCrossHairH = NULL;
+	CGameObject* m_pCrossHairV = NULL;
 
 	std::vector<CEnemyObject*> m_vEnemies;
 	std::vector<CBulletObject*> m_vBullets;
