@@ -202,6 +202,7 @@ CEnemyObject::CEnemyObject()
 
 CEnemyObject::~CEnemyObject()
 {
+	m_pMesh = NULL;
 }
 
 /*
@@ -295,6 +296,7 @@ CFragmentObject::CFragmentObject()
 
 CFragmentObject::~CFragmentObject()
 {
+	m_pMesh = NULL;
 }
 
 // 파편 오브젝트
