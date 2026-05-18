@@ -280,15 +280,18 @@ void CObjectsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 육면체 벽 메쉬 생성
-	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f);
+	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 
+		150.0f, 100.0f, 150.0f, XMFLOAT4(0.7f, 0.9f, 1.0f, 1.0f));
 	// 도착 지점 메쉬 생성
-	CCubeMeshDiffused* pGoalMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+	CCubeMeshDiffused* pGoalMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f, 
+		XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
 
 	float floorThickness = 20.0f;
 	float floorStepHeight = 20.0f;
 
 	// 바닥 메쉬 생성
-	CCubeMeshDiffused* pFloorMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 150.0f, floorThickness, 150.0f);
+	CCubeMeshDiffused* pFloorMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 
+		150.0f, floorThickness, 150.0f, XMFLOAT4(1.0f, 0.8f, 0.6f, 1.0f));
 
 	BuildMazeMap();   // 미로 생성
 	BuildFloorMap();  // 바닥 생성
@@ -522,7 +525,7 @@ void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	CCubeMeshDiffused* pEnemyMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList,
-		100.0f, 60.0f, 40.0f
+		100.0f, 60.0f, 40.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
 
 	XMFLOAT3 enemyPositions[] =

@@ -72,7 +72,7 @@ CTriangleMesh::CTriangleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 
 CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
-	float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
+	float fWidth, float fHeight, float fDepth, XMFLOAT4 xmf4Color) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	// 직육면체는 꼭지점(정점)이 8개
 	m_nVertices = 8;
@@ -81,16 +81,31 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
 
+	XMFLOAT4 topColor = XMFLOAT4(
+		min(xmf4Color.x + 0.2f, 1.0f),
+		min(xmf4Color.y + 0.2f, 1.0f),
+		min(xmf4Color.z + 0.2f, 1.0f),
+		1.0f
+	);
+
+	XMFLOAT4 bottomColor = XMFLOAT4(
+		xmf4Color.x * 0.6f,
+		xmf4Color.y * 0.6f,
+		xmf4Color.z * 0.6f,
+		1.0f
+	);
+
 	// 정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가짐
 	CDiffusedVertex pVertices[8];
-	pVertices[0] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz), RANDOM_COLOR);
-	pVertices[1] = CDiffusedVertex(XMFLOAT3(+fx, +fy, -fz), RANDOM_COLOR);
-	pVertices[2] = CDiffusedVertex(XMFLOAT3(+fx, +fy, +fz), RANDOM_COLOR);
-	pVertices[3] = CDiffusedVertex(XMFLOAT3(-fx, +fy, +fz), RANDOM_COLOR);
-	pVertices[4] = CDiffusedVertex(XMFLOAT3(-fx, -fy, -fz), RANDOM_COLOR);
-	pVertices[5] = CDiffusedVertex(XMFLOAT3(+fx, -fy, -fz), RANDOM_COLOR);
-	pVertices[6] = CDiffusedVertex(XMFLOAT3(+fx, -fy, +fz), RANDOM_COLOR);
-	pVertices[7] = CDiffusedVertex(XMFLOAT3(-fx, -fy, +fz), RANDOM_COLOR);
+	pVertices[0] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz), topColor);
+	pVertices[1] = CDiffusedVertex(XMFLOAT3(+fx, +fy, -fz), topColor);
+	pVertices[2] = CDiffusedVertex(XMFLOAT3(+fx, +fy, +fz), topColor);
+	pVertices[3] = CDiffusedVertex(XMFLOAT3(-fx, +fy, +fz), topColor);
+
+	pVertices[4] = CDiffusedVertex(XMFLOAT3(-fx, -fy, -fz), bottomColor);
+	pVertices[5] = CDiffusedVertex(XMFLOAT3(+fx, -fy, -fz), bottomColor);
+	pVertices[6] = CDiffusedVertex(XMFLOAT3(+fx, -fy, +fz), bottomColor);
+	pVertices[7] = CDiffusedVertex(XMFLOAT3(-fx, -fy, +fz), bottomColor);
 
 	// 정점 버퍼 생성
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,

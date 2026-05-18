@@ -426,7 +426,7 @@ CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(
 		pd3dDevice,
 		pd3dCommandList,
-		24.0f, 36.0f, 24.0f
+		24.0f, 36.0f, 24.0f, XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
 
 	SetMesh(pCubeMesh);
