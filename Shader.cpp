@@ -405,11 +405,24 @@ void CObjectsShader::ReleaseObjects()
 	m_vEnemies.clear();
 }
 
-void CObjectsShader::AnimateObjects(float fTimeElapsed)
+void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 {
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		m_ppObjects[j]->Animate(fTimeElapsed);
+	}
+
+	if (pPlayer)
+	{
+		XMFLOAT3 playerPos = pPlayer->GetPosition();
+
+		for (CEnemyObject* pEnemy : m_vEnemies)
+		{
+			if (pEnemy)
+			{
+				pEnemy->MoveToPlayer(playerPos, fTimeElapsed);
+			}
+		}
 	}
 }
 

@@ -88,7 +88,7 @@ public:
 	virtual ~CObjectsShader();
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void AnimateObjects(float fTimeElapsed, CPlayer* pPlayer);
 	virtual void ReleaseObjects();
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();

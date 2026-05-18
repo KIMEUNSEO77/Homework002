@@ -569,7 +569,7 @@ void CGameFramework::ProcessInput()
 void CGameFramework::AnimateObjects()
 {
 	// 게임 씬에 생성된 게임 오브젝트를 애니메이션
-	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
+	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed(), m_pPlayer);
 }
 
 void CGameFramework::WaitForGpuComplete()

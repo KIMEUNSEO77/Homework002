@@ -53,11 +53,11 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 {
 	return(false);
 }
-void CScene::AnimateObjects(float fTimeElapsed)
+void CScene::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 {
 	for (int i = 0; i < m_nShaders; i++)
 	{
-		m_pShaders[i].AnimateObjects(fTimeElapsed);
+		m_pShaders[i].AnimateObjects(fTimeElapsed, pPlayer);
 	}
 }
 
