@@ -303,7 +303,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	float fyPitch = 100.0f;
 	float fzPitch = 150.0f;
 
-	const int enemyCount = 3;
+	const int enemyCount = 7;
 
 	// 바닥 MAZE_X * MAZE_Z개 + 벽 최대 개수 + 도착 지점 1개
 	int maxObjects = (MAZE_X * MAZE_Z) + (MAZE_X * MAZE_Z * wallHeight) + 1 + enemyCount;
@@ -525,14 +525,19 @@ void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	CCubeMeshDiffused* pEnemyMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList,
-		100.0f, 60.0f, 40.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+		40.0f, 60.0f, 40.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
 
+	// 적 7마리 초기 위치
 	XMFLOAT3 enemyPositions[] =
 	{
-		XMFLOAT3(150.0f * 3, 60.0f, 150.0f * 3),
-		XMFLOAT3(150.0f * 5, 60.0f, 150.0f * 5),
-		XMFLOAT3(150.0f * 8, 60.0f, 150.0f * 9)
+		XMFLOAT3(150.0f * 2, 60.0f, 150.0f * 1),
+		XMFLOAT3(150.0f * 5, 60.0f, 150.0f * 1),
+		XMFLOAT3(150.0f * 7, 60.0f, 150.0f * 3),
+		XMFLOAT3(150.0f * 3, 60.0f, 150.0f * 5),
+		XMFLOAT3(150.0f * 5, 60.0f, 150.0f * 7),
+		XMFLOAT3(150.0f * 8, 60.0f, 150.0f * 9),
+		XMFLOAT3(150.0f * 9, 60.0f, 150.0f * 9)
 	};
 
 	for (auto& pos : enemyPositions)
