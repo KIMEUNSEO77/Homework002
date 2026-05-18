@@ -896,7 +896,7 @@ void CObjectsShader::SetResultObjectPosition(CPlayer* pPlayer)
 
 	XMFLOAT3 resultPos = XMFLOAT3(
 		pos.x + look.x * 300.0f,
-		pos.y + 120.0f,
+		pos.y + 20.0f,
 		pos.z + look.z * 300.0f
 	);
 
