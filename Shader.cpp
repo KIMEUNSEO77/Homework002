@@ -531,7 +531,7 @@ void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	// 적 7마리 초기 위치
 	XMFLOAT3 enemyPositions[] =
 	{
-		XMFLOAT3(150.0f * 2, 60.0f, 150.0f * 1),
+		XMFLOAT3(150.0f * 1, 60.0f, 150.0f * 4),
 		XMFLOAT3(150.0f * 5, 60.0f, 150.0f * 1),
 		XMFLOAT3(150.0f * 7, 60.0f, 150.0f * 3),
 		XMFLOAT3(150.0f * 3, 60.0f, 150.0f * 5),
