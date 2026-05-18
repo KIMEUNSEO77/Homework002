@@ -172,6 +172,27 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
 }
 
+// 게임 객체의 look 벡터 설정
+void CGameObject::SetLookDirection(XMFLOAT3 look)
+{
+	look = Vector3::Normalize(look);
+
+	XMFLOAT3 up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	XMFLOAT3 right = Vector3::CrossProduct(up, look, true);
+	up = Vector3::CrossProduct(look, right, true);
+
+	m_xmf4x4World._11 = right.x;
+	m_xmf4x4World._12 = right.y;
+	m_xmf4x4World._13 = right.z;
+
+	m_xmf4x4World._21 = up.x;
+	m_xmf4x4World._22 = up.y;
+	m_xmf4x4World._23 = up.z;
+
+	m_xmf4x4World._31 = look.x;
+	m_xmf4x4World._32 = look.y;
+	m_xmf4x4World._33 = look.z;
+}
 
 
 // 적 오브젝트
@@ -251,6 +272,7 @@ CBulletObject::CBulletObject()
 
 CBulletObject::~CBulletObject()
 {
+	m_pMesh = NULL;
 }
 
 void CBulletObject::Animate(float fTimeElapsed)

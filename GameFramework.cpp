@@ -468,6 +468,9 @@ void CGameFramework::ProcessInput()
 	static UCHAR pKeyBuffer[256];
 	DWORD dwDirection = 0;
 
+	m_fBulletCooldown -= m_GameTimer.GetTimeElapsed();
+	if (m_fBulletCooldown < 0.0f) m_fBulletCooldown = 0.0f;
+
 	/*키보드의 상태 정보를 반환한다. 화살표 키(‘→’, ‘←’, ‘↑’, ‘↓’)를 누르면 플레이어를 오른쪽/왼쪽(로컬 x-축), 앞/
 	뒤(로컬 z-축)로 이동한다. ‘Page Up’과 ‘Page Down’ 키를 누르면 플레이어를 위/아래(로컬 y-축)로 이동한다.*/
 	if (::GetKeyboardState(pKeyBuffer))
@@ -480,9 +483,11 @@ void CGameFramework::ProcessInput()
 		if (pKeyBuffer['Q'] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer['E'] & 0xF0) dwDirection |= DIR_DOWN;
 
-		if (pKeyBuffer[VK_SPACE] & 0xF0)
+		if ((pKeyBuffer[VK_SPACE] & 0xF0) && m_fBulletCooldown <= 0.0f)
 		{
 			m_pScene->ShootBullet(m_pPlayer);
+
+			m_fBulletCooldown = 2.0f; // 2초에 한 번만 발사
 		}
 	}
 

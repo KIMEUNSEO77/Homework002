@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Shader.h"
 #include "Player.h"
+#include <algorithm>
 
 CShader::CShader()
 {
@@ -481,6 +482,23 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 	{
 		if (pBullet) pBullet->Animate(fTimeElapsed);
 	}
+	m_vBullets.erase(
+		std::remove_if(
+			m_vBullets.begin(),
+			m_vBullets.end(),
+			[](CBulletObject* pBullet)
+			{
+				if (pBullet && pBullet->IsDead())
+				{
+					delete pBullet;
+					return true;
+				}
+
+				return false;
+			}
+		),
+		m_vBullets.end()
+	);
 
 	UpdateGun(pPlayer);
 }
@@ -671,7 +689,7 @@ void CObjectsShader::BuildGunAndBulletMesh(ID3D12Device* pd3dDevice, ID3D12Graph
 	m_pBulletMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList,
 		10.0f, 10.0f, 10.0f,
-		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+		XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
 }
 
@@ -689,4 +707,5 @@ void CObjectsShader::UpdateGun(CPlayer* pPlayer)
 	);
 
 	m_pGun->SetPosition(gunPos);
+	m_pGun->SetLookDirection(look);
 }

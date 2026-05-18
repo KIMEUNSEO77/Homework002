@@ -45,6 +45,8 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 
+	void SetLookDirection(XMFLOAT3 look);
+
 	// 게임 객체를 로컬 x-축, y-축, z-축 방향으로 이동
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);

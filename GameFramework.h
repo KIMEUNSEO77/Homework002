@@ -64,6 +64,8 @@ private:
 	_TCHAR m_pszFrameRate[50];
 
 	CScene* m_pScene; // 게임 씬 포인터 (게임의 모든 오브젝트와 로직을 관리하는 클래스)
+
+	float m_fBulletCooldown = 0.0f;  // 총알 발사 쿨타임
 public:
 	CCamera* m_pCamera = NULL;
 
