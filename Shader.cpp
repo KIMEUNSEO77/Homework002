@@ -793,3 +793,37 @@ void CObjectsShader::CreateFragments(XMFLOAT3 pos)
 		m_vFragments.push_back(pFragment);
 	}
 }
+
+bool CObjectsShader::CheckGoalCollision(CPlayer* pPlayer)
+{
+	if (!pPlayer) return false;
+
+	XMFLOAT3 pos = pPlayer->GetPosition();
+
+	float goalX = 150.0f * 9;
+	float goalZ = 150.0f * 9;
+
+	float dx = pos.x - goalX;
+	float dz = pos.z - goalZ;
+
+	float dist = sqrtf(dx * dx + dz * dz);
+
+	return (dist < 60.0f);
+}
+
+bool CObjectsShader::CheckEnemyCollision(CPlayer* pPlayer)
+{
+	if (!pPlayer) return false;
+
+	BoundingBox playerBox = pPlayer->GetBoundingBox();
+
+	for (CEnemyObject* pEnemy : m_vEnemies)
+	{
+		if (!pEnemy) continue;
+
+		if (playerBox.Intersects(pEnemy->GetBoundingBox()))
+			return true;
+	}
+
+	return false;
+}

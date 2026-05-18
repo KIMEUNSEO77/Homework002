@@ -151,3 +151,13 @@ void CScene::ShootBullet(CPlayer* pPlayer)
 		m_pShaders->ShootBullet(pPlayer);
 	}
 }
+
+bool CScene::CheckEnemyCollision(CPlayer* pPlayer)
+{
+	return m_pShaders && m_pShaders->CheckEnemyCollision(pPlayer);
+}
+
+bool CScene::CheckGoalCollision(CPlayer* pPlayer)
+{
+	return m_pShaders && m_pShaders->CheckGoalCollision(pPlayer);
+}

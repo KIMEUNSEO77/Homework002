@@ -682,6 +682,20 @@ void CGameFramework::FrameAdvance()
 	// GetTimer에게 프레임 레이트를 계산하도록 하고, 프레임 레이트를 문자열로 변환하여 주 윈도우의 캡션에 출력
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
+
+	// 게임 오버, 게임 클리어가 아닐 때 충돌 검사
+	if (!m_pScene->IsGameOver() && !m_pScene->IsGameClear())
+	{
+		if (m_pScene->CheckEnemyCollision(m_pPlayer))
+		{
+			m_pScene->SetGameOver();
+		}
+
+		if (m_pScene->CheckGoalCollision(m_pPlayer))
+		{
+			m_pScene->SetGameClear();
+		}
+	}
 }
 
 // F9키가 눌려지면 윈도우 모드와 전체화면 모드의 전환을 처리하는 함수

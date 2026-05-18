@@ -102,24 +102,27 @@ public:
 	void BuildMazeMap();   // 미로 만들기
 	void BuildFloorMap();
 
-	bool CheckObjectCollision(CGameObject* pObject);  // 충돌 검사 함수
+	// 충돌 검사
+	bool CheckObjectCollision(CGameObject* pObject); 
 	float GetFloorHeight(float x, float z);       // 바닥 높이 함수
+	bool CheckEnemyCollision(CPlayer* pPlayer);
+	bool CheckGoalCollision(CPlayer* pPlayer);
 
 	void BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList); // 적 생성
 	void ShootBullet(CPlayer* pPlayer); // 총알 생성
-
-	CGameObject* m_pGun = NULL;
-	CCubeMeshDiffused* m_pBulletMesh = NULL;
-	CMesh* m_pFragmentMesh = NULL;
+	void CreateFragments(XMFLOAT3 pos);  // 파편 생성
 
 	void BuildGunAndBulletMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void UpdateGun(CPlayer* pPlayer);
 
-	void CreateFragments(XMFLOAT3 pos);  // 파편 생성
 
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리
 	int m_nObjects = 0;
+
+	CGameObject* m_pGun = NULL;
+	CCubeMeshDiffused* m_pBulletMesh = NULL;
+	CMesh* m_pFragmentMesh = NULL;
 
 	std::vector<CEnemyObject*> m_vEnemies;
 	std::vector<CBulletObject*> m_vBullets;

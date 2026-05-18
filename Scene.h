@@ -31,10 +31,22 @@ public:
 	float GetFloorHeight(float x, float z);  // 바닥 높이 함수
 	void ShootBullet(CPlayer* pPlayer); // 총알 발사
 
+	bool IsGameOver() { return m_bGameOver; }
+	bool IsGameClear() { return m_bGameClear; }
+
+	void SetGameOver() { m_bGameOver = true; }
+	void SetGameClear() { m_bGameClear = true; }
+
+	bool CheckEnemyCollision(CPlayer* pPlayer);
+	bool CheckGoalCollision(CPlayer* pPlayer);
+
 protected:	
 	// 배치(Batch) 처리를 하기 위해 씬을 셰이더들의 리스트로 표현
 	CObjectsShader* m_pShaders = NULL;
 	int m_nShaders = 0;
+
+	bool m_bGameOver = false;
+	bool m_bGameClear = false;
 
 
 	// 렌더링 파이프라인의 "설정 정보"를 GPU에게 전달하는 중요한 객체들
@@ -44,7 +56,6 @@ protected:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
 	// 파이프라인 상태를 나타내는 인터페이스 포인터
-	// GPU 렌더링 파이프라인의 전체 설정을 담고 있음. (어떻게 그릴지?)
 	//ID3D12PipelineState* m_pd3dPipelineState = NULL;
 };
 
