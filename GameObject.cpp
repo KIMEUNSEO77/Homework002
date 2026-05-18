@@ -287,3 +287,26 @@ void CBulletObject::Animate(float fTimeElapsed)
 
 	m_fLifeTime -= fTimeElapsed;
 }
+
+
+CFragmentObject::CFragmentObject()
+{
+}
+
+CFragmentObject::~CFragmentObject()
+{
+}
+
+// 파편 오브젝트
+void CFragmentObject::Animate(float fTimeElapsed)
+{
+	XMFLOAT3 pos = GetPosition();
+
+	pos.x += m_xmf3Velocity.x * fTimeElapsed;
+	pos.y += m_xmf3Velocity.y * fTimeElapsed;
+	pos.z += m_xmf3Velocity.z * fTimeElapsed;
+
+	SetPosition(pos);
+
+	m_fLifeTime -= fTimeElapsed;
+}

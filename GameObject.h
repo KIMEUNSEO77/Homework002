@@ -139,3 +139,21 @@ public:
 
 	virtual void Animate(float fTimeElapsed);
 };
+
+// 파편 오브젝트
+class CFragmentObject : public CGameObject
+{
+public:
+	CFragmentObject();
+	virtual ~CFragmentObject();
+
+private:
+	XMFLOAT3 m_xmf3Velocity;
+	float m_fLifeTime = 1.0f;
+
+public:
+	void SetVelocity(XMFLOAT3 v) { m_xmf3Velocity = v; }
+	bool IsDead() { return m_fLifeTime <= 0.0f; }
+
+	virtual void Animate(float fTimeElapsed);
+};
