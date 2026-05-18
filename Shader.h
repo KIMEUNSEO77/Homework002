@@ -110,7 +110,7 @@ public:
 	bool CheckGoalCollision(CPlayer* pPlayer);
 
 	void BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList); // 利 积己
-	void ShootBullet(CPlayer* pPlayer); // 醚舅 积己
+	void ShootBullet(CPlayer* pPlayer, CCamera* pCamera); // 醚舅 积己
 	void CreateFragments(XMFLOAT3 pos);  // 颇祈 积己
 	void BuildCrossHair(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);   // 炼霖痢 积己
 

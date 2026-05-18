@@ -144,11 +144,11 @@ float CScene::GetFloorHeight(float x, float z)
 	return m_pShaders->GetFloorHeight(x, z);
 }
 
-void CScene::ShootBullet(CPlayer* pPlayer)
+void CScene::ShootBullet(CPlayer* pPlayer, CCamera* pCamera)
 {
 	if (m_pShaders)
 	{
-		m_pShaders->ShootBullet(pPlayer);
+		m_pShaders->ShootBullet(pPlayer, pCamera);
 	}
 }
 

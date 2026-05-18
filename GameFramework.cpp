@@ -485,7 +485,7 @@ void CGameFramework::ProcessInput()
 
 		if ((pKeyBuffer[VK_SPACE] & 0xF0) && m_fBulletCooldown <= 0.0f)
 		{
-			m_pScene->ShootBullet(m_pPlayer);
+			m_pScene->ShootBullet(m_pPlayer, m_pCamera);
 
 			m_fBulletCooldown = 2.0f; // 2초에 한 번만 발사
 		}

@@ -29,7 +29,7 @@ public:
 
 	bool CheckObjectCollision(CGameObject* pObject);
 	float GetFloorHeight(float x, float z);  // ¹Ù´Ú ³ôÀÌ ÇÔ¼ö
-	void ShootBullet(CPlayer* pPlayer); // ÃÑ¾Ë ¹ß»ç
+	void ShootBullet(CPlayer* pPlayer, CCamera* pCamera); // ÃÑ¾Ë ¹ß»ç
 
 	bool IsGameOver() { return m_bGameOver; }
 	bool IsGameClear() { return m_bGameClear; }

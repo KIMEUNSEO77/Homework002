@@ -749,25 +749,43 @@ void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	BuildGunAndBulletMesh(pd3dDevice, pd3dCommandList);
 }
 
-void CObjectsShader::ShootBullet(CPlayer* pPlayer)
+void CObjectsShader::ShootBullet(CPlayer* pPlayer, CCamera* pCamera)
 {
-	if (!pPlayer || !m_pBulletMesh) return;
+	if (!pPlayer || !pCamera || !m_pBulletMesh) return;
 
 	CBulletObject* pBullet = new CBulletObject();
 	pBullet->SetMesh(m_pBulletMesh);
 
-	XMFLOAT3 playerPos = pPlayer->GetPosition();
-	XMFLOAT3 look = pPlayer->GetLookVector();
+	XMFLOAT3 startPos;
+	XMFLOAT3 dir;
+	XMFLOAT3 bulletPos;
 
-	XMFLOAT3 bulletPos = XMFLOAT3(
-		playerPos.x + look.x,
-		playerPos.y + 20.0f,
-		playerPos.z + look.z
-	);
+	if (pCamera && pCamera->GetMode() == THIRD_PERSON_CAMERA)
+	{
+		startPos = pPlayer->GetPosition();
+		dir = pPlayer->GetLookVector();
+
+		bulletPos = XMFLOAT3(
+			startPos.x + dir.x * 30.0f,
+			startPos.y + 20.0f,
+			startPos.z + dir.z * 30.0f
+		);
+	}
+	else
+	{
+		startPos = pCamera->GetPosition();
+		dir = pCamera->GetLookVector();
+
+		bulletPos = XMFLOAT3(
+			startPos.x + dir.x * 30.0f,
+			startPos.y + dir.y * 30.0f,
+			startPos.z + dir.z * 30.0f
+		);
+	}
 
 	pBullet->SetPosition(bulletPos);
-	pBullet->SetBoundingBox(bulletPos, XMFLOAT3(5.0f, 5.0f, 5.0f)); // 바운딩 박스
-	pBullet->SetDirection(look);
+	pBullet->SetBoundingBox(bulletPos, XMFLOAT3(5.0f, 5.0f, 5.0f));
+	pBullet->SetDirection(dir);
 
 	m_vBullets.push_back(pBullet);
 }
