@@ -102,6 +102,7 @@ public:
 	void BuildFloorMap();
 
 	bool CheckObjectCollision(CPlayer* pPlayer);  // 충돌 검사 함수
+	float GetFloorHeight(float x, float z);       // 바닥 높이 함수
 
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리

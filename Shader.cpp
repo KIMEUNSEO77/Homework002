@@ -284,8 +284,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	// 도착 지점 메쉬 생성
 	CCubeMeshDiffused* pGoalMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
-	float floorThickness = 12.0f;
-	float floorStepHeight = 5.0f;
+	float floorThickness = 20.0f;
+	float floorStepHeight = 20.0f;
 
 	// 바닥 메쉬 생성
 	CCubeMeshDiffused* pFloorMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 150.0f, floorThickness, 150.0f);
@@ -486,4 +486,21 @@ bool CObjectsShader::CheckObjectCollision(CPlayer* pPlayer)
 	}
 
 	return false;
+}
+
+// 바닥 높이 함수
+float CObjectsShader::GetFloorHeight(float x, float z)
+{
+	const float cellSize = 150.0f;
+	const float floorStepHeight = 20.0f;
+
+	int mazeX = (int)((x + cellSize * 0.5f) / cellSize);
+	int mazeZ = (int)((z + cellSize * 0.5f) / cellSize);
+
+	if (mazeX < 0 || mazeX >= MAZE_X) return 0.0f;
+	if (mazeZ < 0 || mazeZ >= MAZE_Z) return 0.0f;
+
+	if (m_Maze[mazeZ][mazeX] == 1) return 0.0f;
+
+	return m_Floor[mazeZ][mazeX] * floorStepHeight;
 }

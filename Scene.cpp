@@ -136,3 +136,10 @@ bool CScene::CheckObjectCollision(CPlayer* pPlayer)
 
 	return m_pShaders->CheckObjectCollision(pPlayer);
 }
+
+float CScene::GetFloorHeight(float x, float z)
+{
+	if (!m_pShaders) return 0.0f;
+
+	return m_pShaders->GetFloorHeight(x, z);
+}

@@ -545,6 +545,20 @@ void CGameFramework::ProcessInput()
 			v.z = 0.0f;
 			m_pPlayer->SetVelocity(v);
 		}
+		// 바닥 높이에 따라 플레이어 높이 바꾸기
+		XMFLOAT3 pos = m_pPlayer->GetPosition();
+		XMFLOAT3 look = m_pPlayer->GetLookVector();
+
+		float checkX = pos.x + look.x * 35.0f;
+		float checkZ = pos.z + look.z * 35.0f;
+
+		float floorY = m_pScene->GetFloorHeight(checkX, checkZ);
+		float targetY = floorY + 60.0f;
+		// 보간
+		float t = 20.0f * m_GameTimer.GetTimeElapsed();
+		if (t > 1.0f) t = 1.0f;
+		pos.y = pos.y + (targetY - pos.y) * t;
+		m_pPlayer->SetPosition(pos);
 
 	}
 
