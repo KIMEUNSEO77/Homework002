@@ -3,6 +3,7 @@
 
 #include "GameObject.h"
 #include "Camera.h"
+#include <vector>
 
 // 미로 크기
 #define MAZE_X 11
@@ -104,9 +105,13 @@ public:
 	bool CheckObjectCollision(CPlayer* pPlayer);  // 충돌 검사 함수
 	float GetFloorHeight(float x, float z);       // 바닥 높이 함수
 
+	void BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리
 	int m_nObjects = 0;
+
+	std::vector<CEnemyObject*> m_vEnemies;
 
 	int m_Maze[MAZE_Z][MAZE_X];        // 미로 배열, 0이면 빈 공간, 1이면 벽
 	int m_Floor[MAZE_Z][MAZE_X];       // 바닥 배열

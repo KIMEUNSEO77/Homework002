@@ -292,6 +292,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	BuildMazeMap();   // 미로 생성
 	BuildFloorMap();  // 바닥 생성
+	BuildEnemies(pd3dDevice, pd3dCommandList); // 적 생성
 
 	const int wallHeight = 3;
 
@@ -299,8 +300,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	float fyPitch = 100.0f;
 	float fzPitch = 150.0f;
 
+	const int enemyCount = 3;
+
 	// 바닥 MAZE_X * MAZE_Z개 + 벽 최대 개수 + 도착 지점 1개
-	int maxObjects = (MAZE_X * MAZE_Z) + (MAZE_X * MAZE_Z * wallHeight) + 1;
+	int maxObjects = (MAZE_X * MAZE_Z) + (MAZE_X * MAZE_Z * wallHeight) + 1 + enemyCount;
 	m_ppObjects = new CGameObject * [maxObjects];
 
 	int i = 0;
@@ -392,6 +395,11 @@ void CObjectsShader::ReleaseObjects()
 		}
 		delete[] m_ppObjects;
 	}
+	for (CEnemyObject* pEnemy : m_vEnemies)
+	{
+		delete pEnemy;
+	}
+	m_vEnemies.clear();
 }
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
@@ -419,6 +427,10 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		{
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
+	}
+	for (CEnemyObject* pEnemy : m_vEnemies)
+	{
+		if (pEnemy) pEnemy->Render(pd3dCommandList, pCamera);
 	}
 }
 
@@ -503,4 +515,31 @@ float CObjectsShader::GetFloorHeight(float x, float z)
 	if (m_Maze[mazeZ][mazeX] == 1) return 0.0f;
 
 	return m_Floor[mazeZ][mazeX] * floorStepHeight;
+}
+
+// 적 생성
+void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CCubeMeshDiffused* pEnemyMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		100.0f, 60.0f, 40.0f
+	);
+
+	XMFLOAT3 enemyPositions[] =
+	{
+		XMFLOAT3(150.0f * 3, 60.0f, 150.0f * 3),
+		XMFLOAT3(150.0f * 5, 60.0f, 150.0f * 5),
+		XMFLOAT3(150.0f * 8, 60.0f, 150.0f * 9)
+	};
+
+	for (auto& pos : enemyPositions)
+	{
+		CEnemyObject* pEnemy = new CEnemyObject();
+		pEnemy->SetMesh(pEnemyMesh);
+		pEnemy->SetPosition(pos);
+		pEnemy->SetBoundingBox(pos, XMFLOAT3(20.0f, 30.0f, 20.0f));
+		pEnemy->SetMoveSpeed(60.0f);
+
+		m_vEnemies.push_back(pEnemy);
+	}
 }
