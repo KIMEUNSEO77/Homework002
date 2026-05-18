@@ -83,6 +83,9 @@ void CGameObject::SetPosition(float x, float y, float z)
 	m_xmf4x4World._41 = x;
 	m_xmf4x4World._42 = y;
 	m_xmf4x4World._43 = z;
+
+	// 바운딩 박스 위치 업데이트
+	if (m_bUseBoundingBox) UpdateBoundingBox();
 }
 
 void CGameObject::SetPosition(XMFLOAT3 xmf3Position)

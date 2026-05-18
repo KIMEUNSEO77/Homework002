@@ -20,6 +20,11 @@ protected:
 	XMFLOAT4X4 m_xmf4x4World;  // 월드 변환 행렬 (이 오브젝트를 어디에 놓을지)
 	CMesh* m_pMesh = NULL;     // 이 오브젝트가 어떤 모양인지
 	CShader* m_pShader = NULL; // 어떻게 그릴지
+
+	// 바운딩 박스
+	BoundingBox m_xmBoundingBox;
+	bool m_bUseBoundingBox = false;
+
 public:
 	void ReleaseUploadBuffers();
 	virtual void SetMesh(CMesh* pMesh);
@@ -53,6 +58,22 @@ public:
 	// 상수 버퍼의 내용을 갱신
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
+
+	// 바운딩 박스 함수
+	void SetBoundingBox(XMFLOAT3 xmf3Center, XMFLOAT3 xmf3Extents)
+	{
+		m_xmBoundingBox.Center = xmf3Center;
+		m_xmBoundingBox.Extents = xmf3Extents;
+		m_bUseBoundingBox = true;
+	}
+
+	BoundingBox GetBoundingBox() { return m_xmBoundingBox; }
+	bool HasBoundingBox() { return m_bUseBoundingBox; }
+
+	void UpdateBoundingBox()
+	{
+		m_xmBoundingBox.Center = GetPosition();
+	}
 };
 
 class CRotatingObject : public CGameObject
