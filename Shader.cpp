@@ -463,6 +463,16 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 			{
 				pEnemy->SetPosition(oldPos);
 			}
+
+			// 바닥 단차 맞추기
+			enemyPos = pEnemy->GetPosition();
+			float floorY = GetFloorHeight(enemyPos.x, enemyPos.z);
+			float targetY = floorY + 30.0f;
+			float t = 15.0f * fTimeElapsed;
+			if (t > 1.0f) t = 1.0f;
+			enemyPos.y = enemyPos.y + (targetY - enemyPos.y) * t;
+
+			pEnemy->SetPosition(enemyPos);
 		}
 	}
 }
