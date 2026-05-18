@@ -171,3 +171,43 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 	// 객체의 월드 변환 행렬을 루트 상수(32-비트 값)를 통하여 셰이더 변수(상수 버퍼)로 복사
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
 }
+
+
+
+// 적 오브젝트
+CEnemyObject::CEnemyObject()
+{
+}
+
+CEnemyObject::~CEnemyObject()
+{
+}
+
+// 플레이어에게 이동
+void CEnemyObject::MoveToPlayer(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed)
+{
+	XMFLOAT3 xmf3Position = GetPosition();
+
+	XMFLOAT3 xmf3Direction = XMFLOAT3(
+		xmf3PlayerPosition.x - xmf3Position.x,
+		0.0f,
+		xmf3PlayerPosition.z - xmf3Position.z
+	);
+
+	float fLength = sqrtf(
+		xmf3Direction.x * xmf3Direction.x +
+		xmf3Direction.z * xmf3Direction.z
+	);
+
+	if (fLength > 1.0f)
+	{
+		xmf3Direction.x /= fLength;
+		xmf3Direction.z /= fLength;
+
+		SetPosition(
+			xmf3Position.x + xmf3Direction.x * m_fMoveSpeed * fTimeElapsed,
+			xmf3Position.y,
+			xmf3Position.z + xmf3Direction.z * m_fMoveSpeed * fTimeElapsed
+		);
+	}
+}

@@ -80,6 +80,7 @@ public:
 	}
 };
 
+// 회전하는 오브젝트
 class CRotatingObject : public CGameObject
 {
 public:
@@ -97,3 +98,18 @@ public:
 	virtual void Animate(float fTimeElapsed);
 };
 
+// 적 오브젝트
+class CEnemyObject : public CGameObject
+{
+public:
+	CEnemyObject();
+	virtual ~CEnemyObject();
+
+private:
+	float m_fMoveSpeed = 80.0f;
+
+public:
+	void SetMoveSpeed(float fSpeed) { m_fMoveSpeed = fSpeed; }
+
+	void MoveToPlayer(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed);
+};
