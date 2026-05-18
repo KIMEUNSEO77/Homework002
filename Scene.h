@@ -29,6 +29,8 @@ public:
 
 	bool CheckObjectCollision(CGameObject* pObject);
 	float GetFloorHeight(float x, float z);  // 바닥 높이 함수
+	void ShootBullet(CPlayer* pPlayer, ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList); // 총알 발사
 
 protected:	
 	// 배치(Batch) 처리를 하기 위해 씬을 셰이더들의 리스트로 표현

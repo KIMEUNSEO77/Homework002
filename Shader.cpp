@@ -475,6 +475,12 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 			pEnemy->SetPosition(enemyPos);
 		}
 	}
+
+	// ÃÑ¾Ë ÀÌµ¿
+	for (CBulletObject* pBullet : m_vBullets)
+	{
+		if (pBullet) pBullet->Animate(fTimeElapsed);
+	}
 }
 
 void CObjectsShader::ReleaseUploadBuffers()
@@ -498,6 +504,10 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	for (CEnemyObject* pEnemy : m_vEnemies)
 	{
 		if (pEnemy) pEnemy->Render(pd3dCommandList, pCamera);
+	}
+	for (CBulletObject* pBullet : m_vBullets)
+	{
+		if (pBullet) pBullet->Render(pd3dCommandList, pCamera);
 	}
 }
 
@@ -614,4 +624,40 @@ void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 		m_vEnemies.push_back(pEnemy);
 	}
+}
+
+void CObjectsShader::ShootBullet(
+	CPlayer* pPlayer,
+	ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (!pPlayer) return;
+
+	CBulletObject* pBullet = new CBulletObject();
+
+	// ÃÑ¾Ë ¸Þ½¬
+	CCubeMeshDiffused* pBulletMesh = new CCubeMeshDiffused(
+		pd3dDevice,
+		pd3dCommandList,
+		10.0f, 10.0f, 10.0f,
+		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+	);
+
+	pBullet->SetMesh(pBulletMesh);
+
+	XMFLOAT3 playerPos = pPlayer->GetPosition();
+	XMFLOAT3 look = pPlayer->GetLookVector();
+
+	// ÃÑ±¸ À§Ä¡
+	XMFLOAT3 bulletPos = XMFLOAT3(
+		playerPos.x + look.x * 50.0f,
+		playerPos.y + 20.0f,
+		playerPos.z + look.z * 50.0f
+	);
+
+	pBullet->SetPosition(bulletPos);
+
+	pBullet->SetDirection(look);
+
+	m_vBullets.push_back(pBullet);
 }

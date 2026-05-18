@@ -243,3 +243,25 @@ XMFLOAT3 CEnemyObject::GetMoveToPlayerVector(XMFLOAT3 xmf3PlayerPosition, float 
 		xmf3Direction.z * m_fMoveSpeed * fTimeElapsed
 	);
 }
+
+// 총알 오브젝트
+CBulletObject::CBulletObject()
+{
+}
+
+CBulletObject::~CBulletObject()
+{
+}
+
+void CBulletObject::Animate(float fTimeElapsed)
+{
+	XMFLOAT3 pos = GetPosition();
+
+	pos.x += m_xmf3Direction.x * m_fSpeed * fTimeElapsed;
+	pos.y += m_xmf3Direction.y * m_fSpeed * fTimeElapsed;
+	pos.z += m_xmf3Direction.z * m_fSpeed * fTimeElapsed;
+
+	SetPosition(pos);
+
+	m_fLifeTime -= fTimeElapsed;
+}

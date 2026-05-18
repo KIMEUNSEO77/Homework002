@@ -114,3 +114,26 @@ public:
 	//void MoveToPlayer(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed);
 	XMFLOAT3 GetMoveToPlayerVector(XMFLOAT3 xmf3PlayerPosition, float fTimeElapsed);
 };
+
+// 총알 오브젝트
+class CBulletObject : public CGameObject
+{
+public:
+	CBulletObject();
+	virtual ~CBulletObject();
+
+protected:
+	XMFLOAT3 m_xmf3Direction;
+	float m_fSpeed = 600.0f;
+	float m_fLifeTime = 3.0f;
+
+public:
+	void SetDirection(XMFLOAT3 xmf3Direction)
+	{
+		m_xmf3Direction = xmf3Direction;
+	}
+
+	bool IsDead() { return (m_fLifeTime <= 0.0f); }
+
+	virtual void Animate(float fTimeElapsed);
+};

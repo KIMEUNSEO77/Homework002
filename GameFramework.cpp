@@ -479,6 +479,15 @@ void CGameFramework::ProcessInput()
 
 		if (pKeyBuffer['Q'] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer['E'] & 0xF0) dwDirection |= DIR_DOWN;
+
+		if (pKeyBuffer[VK_SPACE] & 0xF0)
+		{
+			m_pScene->ShootBullet(
+				m_pPlayer,
+				m_pd3dDevice,
+				m_pd3dCommandList
+			);
+		}
 	}
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;

@@ -105,13 +105,16 @@ public:
 	bool CheckObjectCollision(CGameObject* pObject);  // 충돌 검사 함수
 	float GetFloorHeight(float x, float z);       // 바닥 높이 함수
 
-	void BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList); // 적 생성
+	void ShootBullet(CPlayer* pPlayer, ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList); // 총알 생성
 
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리
 	int m_nObjects = 0;
 
 	std::vector<CEnemyObject*> m_vEnemies;
+	std::vector<CBulletObject*> m_vBullets;
 
 	int m_Maze[MAZE_Z][MAZE_X];        // 미로 배열, 0이면 빈 공간, 1이면 벽
 	int m_Floor[MAZE_Z][MAZE_X];       // 바닥 배열
