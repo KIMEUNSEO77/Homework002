@@ -66,6 +66,10 @@ public:
 		m_xmBoundingBox.Extents = xmf3Extents;
 		m_bUseBoundingBox = true;
 	}
+	void SetBoundingBoxCenter(XMFLOAT3 xmf3Center)
+	{
+		m_xmBoundingBox.Center = xmf3Center;
+	}
 
 	BoundingBox GetBoundingBox() { return m_xmBoundingBox; }
 	bool HasBoundingBox() { return m_bUseBoundingBox; }

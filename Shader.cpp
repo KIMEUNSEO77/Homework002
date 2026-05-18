@@ -351,6 +351,11 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 						fzPitch * z
 					);
 
+					pWall->SetBoundingBox(
+						XMFLOAT3(fxPitch * x, floorY + fyPitch * y, fzPitch * z),
+						XMFLOAT3(75.0f, 50.0f, 75.0f)
+					);
+
 					pWall->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
 					pWall->SetRotationSpeed(0.0f);
 

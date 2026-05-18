@@ -85,6 +85,9 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		// 플레이어를 현재 위치 벡터에서 xmf3Shift 벡터만큼 이동
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 
+		// 플레이어 바운딩 박스 위치 갱신
+		if (m_bUseBoundingBox) SetBoundingBoxCenter(m_xmf3Position);
+
 		// 플레이어의 위치가 변경되었으므로 카메라의 위치도 xmf3Shift 벡터만큼 이동
 		if (m_pCamera) m_pCamera->Move(xmf3Shift);
 	}
@@ -430,6 +433,8 @@ CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	XMFLOAT3 xmf3Position = XMFLOAT3(150.0f, 60.0f, 150.0f);
 	SetPosition(xmf3Position);
+
+	SetBoundingBox(GetPosition(), XMFLOAT3(12.0f, 18.0f, 12.0f));
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
