@@ -467,7 +467,7 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 			// 바닥 단차 맞추기
 			enemyPos = pEnemy->GetPosition();
 			float floorY = GetFloorHeight(enemyPos.x, enemyPos.z);
-			float targetY = floorY + 30.0f;
+			float targetY = floorY + 50.0f;
 			float t = 15.0f * fTimeElapsed;
 			if (t > 1.0f) t = 1.0f;
 			enemyPos.y = enemyPos.y + (targetY - enemyPos.y) * t;
@@ -589,7 +589,7 @@ void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	CCubeMeshDiffused* pEnemyMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList,
-		40.0f, 60.0f, 40.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+		40.0f, 100.0f, 40.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
 
 	// 적 7마리 초기 위치
@@ -609,7 +609,7 @@ void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		CEnemyObject* pEnemy = new CEnemyObject();
 		pEnemy->SetMesh(pEnemyMesh);
 		pEnemy->SetPosition(pos);
-		pEnemy->SetBoundingBox(pos, XMFLOAT3(20.0f, 30.0f, 20.0f));
+		pEnemy->SetBoundingBox(pos, XMFLOAT3(20.0f, 50.0f, 20.0f));
 		pEnemy->SetMoveSpeed(60.0f);
 
 		m_vEnemies.push_back(pEnemy);
