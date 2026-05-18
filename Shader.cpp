@@ -412,6 +412,8 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 		m_ppObjects[j]->Animate(fTimeElapsed);
 	}
 
+	const float detectDistance = 500.0f;
+
 	// 적 이동
 	if (pPlayer)
 	{
@@ -421,14 +423,22 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 		{
 			if (!pEnemy) continue;
 
+			XMFLOAT3 enemyPos = pEnemy->GetPosition();
+
+			float dx = playerPos.x - enemyPos.x;
+			float dz = playerPos.z - enemyPos.z;
+
+			float distance = sqrtf(dx * dx + dz * dz);
+
+			// 감지 거리 밖이면 이동하지 않음
+			if (distance > detectDistance) continue;
+
 			// 적이 이동하고 싶은 방향 벡터 계산
 			XMFLOAT3 move = pEnemy->GetMoveToPlayerVector(playerPos, fTimeElapsed);
 
 			XMFLOAT3 oldPos = pEnemy->GetPosition();
 
-			// -------------------------
 			// X축 이동
-			// -------------------------
 			pEnemy->SetPosition(
 				oldPos.x + move.x,
 				oldPos.y,
@@ -440,9 +450,7 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 				pEnemy->SetPosition(oldPos);
 			}
 
-			// -------------------------
 			// Z축 이동
-			// -------------------------
 			oldPos = pEnemy->GetPosition();
 
 			pEnemy->SetPosition(
