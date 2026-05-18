@@ -331,7 +331,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	
 	// 플레이어의 위치를 설정
-	SetPosition(XMFLOAT3(72.0f, 25.0f, 72.0f));
+	SetPosition(XMFLOAT3(150.0f, 60.0f, 150.0f));
 
 	// 플레이어(비행기) 메쉬를 렌더링할 때 사용할 셰이더를 생성
 	CPlayerShader* pShader = new CPlayerShader();
@@ -428,7 +428,7 @@ CCubePlayer::CCubePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	SetMesh(pCubeMesh);
 
-	XMFLOAT3 xmf3Position = XMFLOAT3(72.0f, 35.0f, 72.0f);
+	XMFLOAT3 xmf3Position = XMFLOAT3(150.0f, 60.0f, 150.0f);
 	SetPosition(xmf3Position);
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);

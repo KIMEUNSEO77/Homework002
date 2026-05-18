@@ -279,7 +279,7 @@ void CObjectsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 육면체 벽 메쉬 생성
-	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 72.0f, 30.0f, 72.0f);
+	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f);
 	// 도착 지점 메쉬 생성
 	CCubeMeshDiffused* pGoalMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
@@ -287,16 +287,16 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	float floorStepHeight = 5.0f;
 
 	// 바닥 메쉬 생성
-	CCubeMeshDiffused* pFloorMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 72.0f, floorThickness, 72.0f);
+	CCubeMeshDiffused* pFloorMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 150.0f, floorThickness, 150.0f);
 
 	BuildMazeMap();   // 미로 생성
 	BuildFloorMap();  // 바닥 생성
 
 	const int wallHeight = 3;
 
-	float fxPitch = 12.0f * 6.0f;
-	float fyPitch = 12.0f * 2.5f;
-	float fzPitch = 12.0f * 6.0f;
+	float fxPitch = 150.0f;
+	float fyPitch = 100.0f;
+	float fzPitch = 150.0f;
 
 	// 바닥 MAZE_X * MAZE_Z개 + 벽 최대 개수 + 도착 지점 1개
 	int maxObjects = (MAZE_X * MAZE_Z) + (MAZE_X * MAZE_Z * wallHeight) + 1;
