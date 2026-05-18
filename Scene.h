@@ -40,6 +40,8 @@ public:
 	bool CheckEnemyCollision(CPlayer* pPlayer);
 	bool CheckGoalCollision(CPlayer* pPlayer);
 
+	void SetResultObjectPosition(CPlayer* pPlayer);
+
 protected:	
 	// 배치(Batch) 처리를 하기 위해 씬을 셰이더들의 리스트로 표현
 	CObjectsShader* m_pShaders = NULL;

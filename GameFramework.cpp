@@ -689,11 +689,13 @@ void CGameFramework::FrameAdvance()
 		if (m_pScene->CheckEnemyCollision(m_pPlayer))
 		{
 			m_pScene->SetGameOver();
+			m_pScene->SetResultObjectPosition(m_pPlayer);
 		}
 
 		if (m_pScene->CheckGoalCollision(m_pPlayer))
 		{
 			m_pScene->SetGameClear();
+			m_pScene->SetResultObjectPosition(m_pPlayer);
 		}
 	}
 }

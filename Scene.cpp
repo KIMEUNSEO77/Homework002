@@ -71,7 +71,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	for (int i = 0; i < m_nShaders; i++)
 	{
-		m_pShaders[i].Render(pd3dCommandList, pCamera);
+		m_pShaders[i].Render(pd3dCommandList, pCamera, m_bGameOver, m_bGameClear);
 	}
 }
 
@@ -160,4 +160,10 @@ bool CScene::CheckEnemyCollision(CPlayer* pPlayer)
 bool CScene::CheckGoalCollision(CPlayer* pPlayer)
 {
 	return m_pShaders && m_pShaders->CheckGoalCollision(pPlayer);
+}
+
+void CScene::SetResultObjectPosition(CPlayer* pPlayer)
+{
+	if (m_pShaders)
+		m_pShaders->SetResultObjectPosition(pPlayer);
 }

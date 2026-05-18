@@ -388,6 +388,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	m_nObjects = i;
 
+	BuildGameStateObjects(pd3dDevice, pd3dCommandList);  // 게임 상태 UI 오브젝트 생성
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -570,9 +572,29 @@ void CObjectsShader::ReleaseUploadBuffers()
 	}
 }
 
-void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bGameOver,
+	bool bGameClear)
 {
 	CShader::Render(pd3dCommandList, pCamera);
+
+	if (bGameOver)
+	{
+		for (CGameObject* pObject : m_vGameOverObjects)
+		{
+			if (pObject) pObject->Render(pd3dCommandList, pCamera);
+		}
+		return;
+	}
+
+	if (bGameClear)
+	{
+		for (CGameObject* pObject : m_vGameClearObjects)
+		{
+			if (pObject) pObject->Render(pd3dCommandList, pCamera);
+		}
+		return;
+	}
+
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
@@ -826,4 +848,65 @@ bool CObjectsShader::CheckEnemyCollision(CPlayer* pPlayer)
 	}
 
 	return false;
+}
+
+void CObjectsShader::BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CCubeMeshDiffused* pRedMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		300.0f, 40.0f, 20.0f,
+		XMFLOAT4(1.0f, 0.2f, 0.2f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pBlueMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		300.0f, 40.0f, 20.0f,
+		XMFLOAT4(0.7f, 0.9f, 1.0f, 1.0f)
+	);
+
+	// GAME OVER 느낌: 빨간 X
+	CGameObject* pOver1 = new CGameObject();
+	pOver1->SetMesh(pRedMesh);
+	pOver1->SetPosition(150.0f * 5, 250.0f, 150.0f * 5);
+	pOver1->Rotate(0.0f, 0.0f, 45.0f);
+	m_vGameOverObjects.push_back(pOver1);
+
+	CGameObject* pOver2 = new CGameObject();
+	pOver2->SetMesh(pRedMesh);
+	pOver2->SetPosition(150.0f * 5, 250.0f, 150.0f * 5);
+	pOver2->Rotate(0.0f, 0.0f, -45.0f);
+	m_vGameOverObjects.push_back(pOver2);
+
+	// GAME CLEAR 느낌: 파란 막대 3개
+	for (int i = 0; i < 3; i++)
+	{
+		CGameObject* pClear = new CGameObject();
+		pClear->SetMesh(pBlueMesh);
+		pClear->SetPosition(150.0f * 5, 200.0f + i * 60.0f, 150.0f * 5);
+		m_vGameClearObjects.push_back(pClear);
+	}
+}
+
+void CObjectsShader::SetResultObjectPosition(CPlayer* pPlayer)
+{
+	if (!pPlayer) return;
+
+	XMFLOAT3 pos = pPlayer->GetPosition();
+	XMFLOAT3 look = pPlayer->GetLookVector();
+
+	XMFLOAT3 resultPos = XMFLOAT3(
+		pos.x + look.x * 300.0f,
+		pos.y + 120.0f,
+		pos.z + look.z * 300.0f
+	);
+
+	for (CGameObject* pObject : m_vGameOverObjects)
+	{
+		if (pObject) pObject->SetPosition(resultPos);
+	}
+
+	for (CGameObject* pObject : m_vGameClearObjects)
+	{
+		if (pObject) pObject->SetPosition(resultPos);
+	}
 }

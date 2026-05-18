@@ -97,7 +97,8 @@ public:
 
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual void ReleaseUploadBuffers();
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, 
+		bool bGameOver, bool bGameClear);
 
 	void BuildMazeMap();   // 미로 만들기
 	void BuildFloorMap();
@@ -114,7 +115,8 @@ public:
 
 	void BuildGunAndBulletMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void UpdateGun(CPlayer* pPlayer);
-
+	void BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void SetResultObjectPosition(CPlayer* pPlayer);  // 게임 오버, 게임 클리어 메시지 위치 설정
 
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리
@@ -127,6 +129,9 @@ protected:
 	std::vector<CEnemyObject*> m_vEnemies;
 	std::vector<CBulletObject*> m_vBullets;
 	std::vector<CFragmentObject*> m_vFragments;
+
+	std::vector<CGameObject*> m_vGameOverObjects;
+	std::vector<CGameObject*> m_vGameClearObjects;
 
 	int m_Maze[MAZE_Z][MAZE_X];        // 미로 배열, 0이면 빈 공간, 1이면 벽
 	int m_Floor[MAZE_Z][MAZE_X];       // 바닥 배열
