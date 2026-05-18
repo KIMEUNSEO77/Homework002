@@ -418,7 +418,7 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 		m_ppObjects[j]->Animate(fTimeElapsed);
 	}
 
-	const float detectDistance = 500.0f;
+	const float detectDistance = 800.0f;
 
 	// Àû ÀÌµ¿
 	if (pPlayer)
