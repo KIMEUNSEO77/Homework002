@@ -978,6 +978,40 @@ void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
 
+	CCubeMeshDiffused* pTitleHMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		48.0f, 7.0f, 7.0f,
+		XMFLOAT4(1.0f, 0.25f, 0.25f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pTitleVMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		7.0f, 48.0f, 7.0f,
+		XMFLOAT4(1.0f, 0.25f, 0.25f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pTitleSmallHMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		32.0f, 7.0f, 7.0f,
+		XMFLOAT4(1.0f, 0.25f, 0.25f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pTitleSmallVMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		7.0f, 32.0f, 7.0f,
+		XMFLOAT4(1.0f, 0.25f, 0.25f, 1.0f)
+	);
+	CCubeMeshDiffused* pLetterHMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		22.0f, 5.0f, 6.0f,
+		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pLetterVMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		5.0f, 22.0f, 6.0f,
+		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+	);
 	CCubeMeshDiffused* pBorderHMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList,
 		118.0f, 8.0f, 8.0f,
@@ -1010,6 +1044,40 @@ void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 		vObjects.push_back(pObject);
 	};
 
+	float titleY = 150.0f;
+	float titleZ = 332.0f;
+	float titleHalfW = 24.0f;
+	float titleHalfH = 24.0f;
+	float titleCharStep = 112.0f;
+	float kimX = 26.0f;
+	float eunX = kimX + titleCharStep;
+	float seoX = eunX + titleCharStep;
+
+	// ±è
+	AddStartObject(pTitleHMesh, XMFLOAT3(kimX - 22.0f, titleY + titleHalfH, titleZ));
+	AddStartObject(pTitleVMesh, XMFLOAT3(kimX + 2.0f, titleY + 4.0f, titleZ));
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(kimX + 34.0f, titleY + 10.0f, titleZ));
+	AddStartObject(pTitleSmallHMesh, XMFLOAT3(kimX - 22.0f, titleY - 16.0f, titleZ));
+	AddStartObject(pTitleSmallHMesh, XMFLOAT3(kimX - 22.0f, titleY - 42.0f, titleZ));
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(kimX - 38.0f, titleY - 29.0f, titleZ));
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(kimX - 6.0f, titleY - 29.0f, titleZ));
+
+	// Àº
+	AddStartObject(pTitleSmallHMesh, XMFLOAT3(eunX - 20.0f, titleY + 22.0f, titleZ));
+	AddStartObject(pTitleSmallHMesh, XMFLOAT3(eunX - 20.0f, titleY - 8.0f, titleZ));
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(eunX - 36.0f, titleY + 7.0f, titleZ));
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(eunX - 4.0f, titleY + 7.0f, titleZ));
+	AddStartObject(pTitleHMesh, XMFLOAT3(eunX - 20.0f, titleY - 34.0f, titleZ));
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(eunX - 42.0f, titleY - 54.0f, titleZ));
+	AddStartObject(pTitleHMesh, XMFLOAT3(eunX - 18.0f, titleY - 68.0f, titleZ));
+
+	// ¼­
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(seoX - 34.0f, titleY + 14.0f, titleZ));
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(seoX - 6.0f, titleY + 14.0f, titleZ));
+	AddStartObject(pTitleHMesh, XMFLOAT3(seoX - 20.0f, titleY - 10.0f, titleZ));
+	AddStartObject(pTitleVMesh, XMFLOAT3(seoX + 34.0f, titleY + 2.0f, titleZ));
+	AddStartObject(pTitleSmallHMesh, XMFLOAT3(seoX + 48.0f, titleY + 2.0f, titleZ));
+
 	AddStartObject(pStage1ButtonMesh, XMFLOAT3(-50.0f, buttonY + 20.0f, buttonZ));
 	AddStartObject(pStage2ButtonMesh, XMFLOAT3(350.0f, buttonY + 20.0f, buttonZ));
 	AddStartObject(pStartButtonMesh, XMFLOAT3(150.0f, buttonY - 20.0f, buttonZ));
@@ -1021,6 +1089,54 @@ void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	AddStartObject(pDigitHMesh, XMFLOAT3(320.0f + 30.0f, buttonY + 20.0f, digitZ));
 	AddStartObject(pDigitVMesh, XMFLOAT3(298.0f + 30.0f, buttonY - 10.0f + 20.0f, digitZ));
 	AddStartObject(pDigitHMesh, XMFLOAT3(320.0f + 30.0f, buttonY - 22.0f + 20.0f, digitZ));
+
+	float startTextY = buttonY - 20.0f;
+	float startTextZ = 332.0f;
+	float letterTop = 13.0f;
+	float letterMid = 0.0f;
+	float letterBottom = -13.0f;
+	float letterLeft = -10.0f;
+	float letterRight = 10.0f;
+	float letterStep = 34.0f;
+	float textStartX = 82.0f;
+
+	auto AddLetterH = [&](float cx, float cy)
+	{
+		AddStartObject(pLetterHMesh, XMFLOAT3(cx, cy, startTextZ));
+	};
+
+	auto AddLetterV = [&](float cx, float cy)
+	{
+		AddStartObject(pLetterVMesh, XMFLOAT3(cx, cy, startTextZ));
+	};
+
+	float xS = textStartX;
+	AddLetterH(xS, startTextY + letterTop);
+	AddLetterV(xS + letterLeft, startTextY + 7.0f);
+	AddLetterH(xS, startTextY + letterMid);
+	AddLetterV(xS + letterRight, startTextY - 7.0f);
+	AddLetterH(xS, startTextY + letterBottom);
+
+	float xT1 = textStartX + letterStep;
+	AddLetterH(xT1, startTextY + letterTop);
+	AddLetterV(xT1, startTextY);
+
+	float xA = textStartX + letterStep * 2.0f;
+	AddLetterH(xA, startTextY + letterTop);
+	AddLetterH(xA, startTextY + letterMid);
+	AddLetterV(xA + letterLeft, startTextY);
+	AddLetterV(xA + letterRight, startTextY);
+
+	float xR = textStartX + letterStep * 3.0f;
+	AddLetterH(xR, startTextY + letterTop);
+	AddLetterH(xR, startTextY + letterMid);
+	AddLetterV(xR + letterLeft, startTextY);
+	AddLetterV(xR + letterRight, startTextY + 7.0f);
+	AddLetterV(xR + letterRight, startTextY - 8.0f);
+
+	float xT2 = textStartX + letterStep * 4.0f;
+	AddLetterH(xT2, startTextY + letterTop);
+	AddLetterV(xT2, startTextY);
 
 	float borderZ = 328.0f;
 	float borderHalfWidth = 58.0f;
