@@ -981,25 +981,25 @@ void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	CCubeMeshDiffused* pTitleHMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList,
 		48.0f, 7.0f, 7.0f,
-		XMFLOAT4(1.0f, 0.25f, 0.25f, 1.0f)
+		XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
 
 	CCubeMeshDiffused* pTitleVMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList,
 		7.0f, 48.0f, 7.0f,
-		XMFLOAT4(1.0f, 0.25f, 0.25f, 1.0f)
+		XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
 
 	CCubeMeshDiffused* pTitleSmallHMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList,
 		32.0f, 7.0f, 7.0f,
-		XMFLOAT4(1.0f, 0.25f, 0.25f, 1.0f)
+		XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
 
 	CCubeMeshDiffused* pTitleSmallVMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList,
 		7.0f, 32.0f, 7.0f,
-		XMFLOAT4(1.0f, 0.25f, 0.25f, 1.0f)
+		XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
 	CCubeMeshDiffused* pLetterHMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList,
@@ -1054,9 +1054,9 @@ void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	float seoX = eunX + titleCharStep;
 
 	// ±è
-	AddStartObject(pTitleHMesh, XMFLOAT3(kimX - 22.0f, titleY + titleHalfH, titleZ));
-	AddStartObject(pTitleVMesh, XMFLOAT3(kimX + 2.0f, titleY + 4.0f, titleZ));
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(kimX + 34.0f, titleY + 10.0f, titleZ));
+	AddStartObject(pTitleHMesh, XMFLOAT3(kimX - 34.0f, titleY + titleHalfH, titleZ));
+	AddStartObject(pTitleVMesh, XMFLOAT3(kimX - 10.0f, titleY + 4.0f, titleZ));
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(kimX + 22.0f, titleY + 10.0f, titleZ));
 	AddStartObject(pTitleSmallHMesh, XMFLOAT3(kimX - 22.0f, titleY - 16.0f, titleZ));
 	AddStartObject(pTitleSmallHMesh, XMFLOAT3(kimX - 22.0f, titleY - 42.0f, titleZ));
 	AddStartObject(pTitleSmallVMesh, XMFLOAT3(kimX - 38.0f, titleY - 29.0f, titleZ));
@@ -1072,11 +1072,11 @@ void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	AddStartObject(pTitleHMesh, XMFLOAT3(eunX - 18.0f, titleY - 68.0f, titleZ));
 
 	// ¼­
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(seoX - 34.0f, titleY + 14.0f, titleZ));
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(seoX - 6.0f, titleY + 14.0f, titleZ));
-	AddStartObject(pTitleHMesh, XMFLOAT3(seoX - 20.0f, titleY - 10.0f, titleZ));
-	AddStartObject(pTitleVMesh, XMFLOAT3(seoX + 34.0f, titleY + 2.0f, titleZ));
-	AddStartObject(pTitleSmallHMesh, XMFLOAT3(seoX + 48.0f, titleY + 2.0f, titleZ));
+	AddStartObject(pTitleSmallHMesh, XMFLOAT3(seoX - 30.0f, titleY + 22.0f, titleZ));
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(seoX - 42.0f, titleY + 6.0f, titleZ));
+	AddStartObject(pTitleSmallVMesh, XMFLOAT3(seoX - 18.0f, titleY + 6.0f, titleZ));
+	AddStartObject(pTitleVMesh, XMFLOAT3(seoX + 28.0f, titleY + 2.0f, titleZ));
+	AddStartObject(pTitleSmallHMesh, XMFLOAT3(seoX + 10.0f, titleY + 2.0f, titleZ));
 
 	AddStartObject(pStage1ButtonMesh, XMFLOAT3(-50.0f, buttonY + 20.0f, buttonZ));
 	AddStartObject(pStage2ButtonMesh, XMFLOAT3(350.0f, buttonY + 20.0f, buttonZ));
