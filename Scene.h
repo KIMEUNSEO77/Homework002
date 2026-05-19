@@ -37,6 +37,9 @@ public:
 	void SetGameOver() { m_bGameOver = true; }
 	void SetGameClear() { m_bGameClear = true; }
 
+	void SetStartStage(bool bStartStage) { m_bStartStage = bStartStage; }
+	void SetSelectedStage(int nSelectedStage) { m_nSelectedStage = nSelectedStage; }
+
 	bool CheckEnemyCollision(CPlayer* pPlayer);
 	bool CheckGoalCollision(CPlayer* pPlayer);
 
@@ -49,6 +52,8 @@ protected:
 
 	bool m_bGameOver = false;
 	bool m_bGameClear = false;
+	bool m_bStartStage = true;
+	int m_nSelectedStage = 1;
 
 
 	// 렌더링 파이프라인의 "설정 정보"를 GPU에게 전달하는 중요한 객체들

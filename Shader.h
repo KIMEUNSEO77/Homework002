@@ -98,7 +98,7 @@ public:
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, 
-		bool bGameOver, bool bGameClear);
+		bool bGameOver, bool bGameClear, bool bStartStage, int nSelectedStage);
 
 	void BuildMazeMap();   // 미로 만들기
 	void BuildFloorMap();
@@ -117,6 +117,7 @@ public:
 	void BuildGunAndBulletMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void UpdateGun(CPlayer* pPlayer);
 	void BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void SetResultObjectPosition(CPlayer* pPlayer);  // 게임 오버, 게임 클리어 메시지 위치 설정
 	void UpdateCrossHair(CCamera* pCamera);
 
@@ -137,6 +138,9 @@ protected:
 
 	std::vector<CGameObject*> m_vGameOverObjects;
 	std::vector<CGameObject*> m_vGameClearObjects;
+	std::vector<CGameObject*> m_vStartStageObjects;
+	std::vector<CGameObject*> m_vStage1SelectObjects;
+	std::vector<CGameObject*> m_vStage2SelectObjects;
 
 	int m_Maze[MAZE_Z][MAZE_X];        // 미로 배열, 0이면 빈 공간, 1이면 벽
 	int m_Floor[MAZE_Z][MAZE_X];       // 바닥 배열

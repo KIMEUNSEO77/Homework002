@@ -6,6 +6,13 @@
 #include "Camera.h"
 #include "Player.h"
 
+enum GAME_STAGE
+{
+	GAME_STAGE_START = 0,
+	GAME_STAGE_1 = 1,
+	GAME_STAGE_2 = 2
+};
+
 // 게임 프로그램 뼈대
 // Direct3D 디바이스를 생성, 사용자 입력 처리, 애니메이션 등 화면 출력을 위한 여러 가지 처리 
 // 윈도우 만들기 + D3D12 장치 준비 + 버퍼 준비 + 명령 전송 + 입력 처리 + 렌더링 + 종료 처리
@@ -66,6 +73,8 @@ private:
 	CScene* m_pScene; // 게임 씬 포인터 (게임의 모든 오브젝트와 로직을 관리하는 클래스)
 
 	float m_fBulletCooldown = 0.0f;  // 총알 발사 쿨타임
+	int m_nGameStage = GAME_STAGE_START;
+	int m_nSelectedStage = GAME_STAGE_1;
 public:
 	CCamera* m_pCamera = NULL;
 
@@ -103,5 +112,7 @@ public:
 
 	void ChangeSwapChainState(); // 스왑 체인 상태 변경 (예: 전체 화면과 창 모드 간 전환)
 	void MoveToNextFrame(); // 다음 프레임으로 이동 (GPU와의 동기화 포함)
+
+	void StartSelectedStage();
 };
 

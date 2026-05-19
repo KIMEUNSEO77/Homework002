@@ -390,6 +390,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_nObjects = i;
 
 	BuildGameStateObjects(pd3dDevice, pd3dCommandList);  // 게임 상태 UI 오브젝트 생성
+	BuildStartStageObjects(pd3dDevice, pd3dCommandList); // 0스테이지 시작 화면 생성
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -409,6 +410,21 @@ void CObjectsShader::ReleaseObjects()
 		delete pEnemy;
 	}
 	m_vEnemies.clear();
+
+	auto ReleaseObjectVector = [](std::vector<CGameObject*>& objects)
+	{
+		for (CGameObject* pObject : objects)
+		{
+			delete pObject;
+		}
+		objects.clear();
+	};
+
+	ReleaseObjectVector(m_vGameOverObjects);
+	ReleaseObjectVector(m_vGameClearObjects);
+	ReleaseObjectVector(m_vStartStageObjects);
+	ReleaseObjectVector(m_vStage1SelectObjects);
+	ReleaseObjectVector(m_vStage2SelectObjects);
 }
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
@@ -574,9 +590,24 @@ void CObjectsShader::ReleaseUploadBuffers()
 }
 
 void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bGameOver,
-	bool bGameClear)
+	bool bGameClear, bool bStartStage, int nSelectedStage)
 {
 	CShader::Render(pd3dCommandList, pCamera);
+
+	if (bStartStage)
+	{
+		for (CGameObject* pObject : m_vStartStageObjects)
+		{
+			if (pObject) pObject->Render(pd3dCommandList, pCamera);
+		}
+
+		std::vector<CGameObject*>& vSelectedObjects = (nSelectedStage == 2) ? m_vStage2SelectObjects : m_vStage1SelectObjects;
+		for (CGameObject* pObject : vSelectedObjects)
+		{
+			if (pObject) pObject->Render(pd3dCommandList, pCamera);
+		}
+		return;
+	}
 
 	if (bGameOver)
 	{
@@ -913,6 +944,99 @@ void CObjectsShader::BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 		pClear->SetPosition(150.0f * 5, 200.0f + i * 60.0f, 150.0f * 5);
 		m_vGameClearObjects.push_back(pClear);
 	}
+}
+
+void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CCubeMeshDiffused* pStage1ButtonMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		100.0f, 70.0f, 34.0f,
+		XMFLOAT4(0.95f, 0.75f, 0.25f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pStage2ButtonMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		100.0f, 70.0f, 34.0f,
+		XMFLOAT4(0.95f, 0.75f, 0.25f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pStartButtonMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		200.0f, 70.0f, 34.0f,
+		XMFLOAT4(0.35f, 0.65f, 1.0f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pDigitHMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		52.0f, 8.0f, 8.0f,
+		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pDigitVMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		8.0f, 32.0f, 8.0f,
+		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pBorderHMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		118.0f, 8.0f, 8.0f,
+		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+	);
+
+	CCubeMeshDiffused* pBorderVMesh = new CCubeMeshDiffused(
+		pd3dDevice, pd3dCommandList,
+		8.0f, 82.0f, 8.0f,
+		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+	);
+
+	float buttonY = -105.0f;
+	float buttonZ = 360.0f;
+	float digitZ = 332.0f;
+
+	auto AddStartObject = [this](CMesh* pMesh, XMFLOAT3 xmf3Position)
+	{
+		CGameObject* pObject = new CGameObject();
+		pObject->SetMesh(pMesh);
+		pObject->SetPosition(xmf3Position);
+		m_vStartStageObjects.push_back(pObject);
+	};
+
+	auto AddSelectionObject = [](std::vector<CGameObject*>& vObjects, CMesh* pMesh, XMFLOAT3 xmf3Position)
+	{
+		CGameObject* pObject = new CGameObject();
+		pObject->SetMesh(pMesh);
+		pObject->SetPosition(xmf3Position);
+		vObjects.push_back(pObject);
+	};
+
+	AddStartObject(pStage1ButtonMesh, XMFLOAT3(-50.0f, buttonY + 20.0f, buttonZ));
+	AddStartObject(pStage2ButtonMesh, XMFLOAT3(350.0f, buttonY + 20.0f, buttonZ));
+	AddStartObject(pStartButtonMesh, XMFLOAT3(150.0f, buttonY - 20.0f, buttonZ));
+
+	AddStartObject(pDigitVMesh, XMFLOAT3(-50.0f, buttonY + 20.0f, digitZ));
+
+	AddStartObject(pDigitHMesh, XMFLOAT3(320.0f + 30.0f, buttonY + 22.0f + 20.0f, digitZ));
+	AddStartObject(pDigitVMesh, XMFLOAT3(342.0f + 30.0f, buttonY + 10.0f + 20.0f, digitZ));
+	AddStartObject(pDigitHMesh, XMFLOAT3(320.0f + 30.0f, buttonY + 20.0f, digitZ));
+	AddStartObject(pDigitVMesh, XMFLOAT3(298.0f + 30.0f, buttonY - 10.0f + 20.0f, digitZ));
+	AddStartObject(pDigitHMesh, XMFLOAT3(320.0f + 30.0f, buttonY - 22.0f + 20.0f, digitZ));
+
+	float borderZ = 328.0f;
+	float borderHalfWidth = 58.0f;
+	float borderHalfHeight = 40.0f;
+	XMFLOAT3 stage1Center = XMFLOAT3(-50.0f, buttonY + 20.0f, borderZ);
+	XMFLOAT3 stage2Center = XMFLOAT3(350.0f, buttonY + 20.0f, borderZ);
+
+	AddSelectionObject(m_vStage1SelectObjects, pBorderHMesh, XMFLOAT3(stage1Center.x, stage1Center.y + borderHalfHeight, borderZ));
+	AddSelectionObject(m_vStage1SelectObjects, pBorderHMesh, XMFLOAT3(stage1Center.x, stage1Center.y - borderHalfHeight, borderZ));
+	AddSelectionObject(m_vStage1SelectObjects, pBorderVMesh, XMFLOAT3(stage1Center.x - borderHalfWidth, stage1Center.y, borderZ));
+	AddSelectionObject(m_vStage1SelectObjects, pBorderVMesh, XMFLOAT3(stage1Center.x + borderHalfWidth, stage1Center.y, borderZ));
+
+	AddSelectionObject(m_vStage2SelectObjects, pBorderHMesh, XMFLOAT3(stage2Center.x, stage2Center.y + borderHalfHeight, borderZ));
+	AddSelectionObject(m_vStage2SelectObjects, pBorderHMesh, XMFLOAT3(stage2Center.x, stage2Center.y - borderHalfHeight, borderZ));
+	AddSelectionObject(m_vStage2SelectObjects, pBorderVMesh, XMFLOAT3(stage2Center.x - borderHalfWidth, stage2Center.y, borderZ));
+	AddSelectionObject(m_vStage2SelectObjects, pBorderVMesh, XMFLOAT3(stage2Center.x + borderHalfWidth, stage2Center.y, borderZ));
 }
 
 void CObjectsShader::SetResultObjectPosition(CPlayer* pPlayer)

@@ -348,6 +348,8 @@ void CGameFramework::BuildObjects()
 	// 씬 객체를 생성하고 씬에 포함될 게임 객체들을 생성(GPU 초기화도 포함)
 	m_pScene = new CScene();
 	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	m_pScene->SetStartStage(true);
+	m_pScene->SetSelectedStage(m_nSelectedStage);
 
 	// 플레이어 객체를 생성하고 플레이어의 카메라를 게임 프레임워크의 카메라로 설정
 	//CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
@@ -382,6 +384,54 @@ void CGameFramework::ReleaseObjects()
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 	LPARAM lParam)
 {
+	if (m_nGameStage == GAME_STAGE_START)
+	{
+		if (nMessageID == WM_LBUTTONDOWN)
+		{
+			::SetCapture(hWnd);
+			return;
+		}
+
+		if (nMessageID == WM_LBUTTONUP)
+		{
+			::ReleaseCapture();
+
+			int x = LOWORD(lParam);
+			int y = HIWORD(lParam);
+			int nStageButtonTop = m_nWndClientHeight * 66 / 100;
+			int nStageButtonBottom = m_nWndClientHeight * 84 / 100;
+			int nStartButtonTop = m_nWndClientHeight * 74 / 100;
+			int nStartButtonBottom = m_nWndClientHeight * 94 / 100;
+
+			int nStage1Left = m_nWndClientWidth * 18 / 100;
+			int nStage1Right = m_nWndClientWidth * 39 / 100;
+			int nStartLeft = m_nWndClientWidth * 36 / 100;
+			int nStartRight = m_nWndClientWidth * 64 / 100;
+			int nStage2Left = m_nWndClientWidth * 61 / 100;
+			int nStage2Right = m_nWndClientWidth * 82 / 100;
+
+			if ((y >= nStageButtonTop) && (y <= nStageButtonBottom) &&
+				(x >= nStage1Left) && (x <= nStage1Right))
+			{
+				m_nSelectedStage = GAME_STAGE_1;
+				if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
+			}
+			else if ((y >= nStartButtonTop) && (y <= nStartButtonBottom) &&
+				(x >= nStartLeft) && (x <= nStartRight))
+			{
+				StartSelectedStage();
+			}
+			else if ((y >= nStageButtonTop) && (y <= nStageButtonBottom) &&
+				(x >= nStage2Left) && (x <= nStage2Right))
+			{
+				m_nSelectedStage = GAME_STAGE_2;
+				if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
+			}
+
+			return;
+		}
+	}
+
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
@@ -408,13 +458,39 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	switch (nMessageID)
 	{
 	case WM_KEYUP:
+		if (m_nGameStage == GAME_STAGE_START)
+		{
+			switch (wParam)
+			{
+			case '1':
+			case VK_LEFT:
+				m_nSelectedStage = GAME_STAGE_1;
+				if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
+				break;
+			case '2':
+			case VK_RIGHT:
+				m_nSelectedStage = GAME_STAGE_2;
+				if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
+				break;
+			case VK_RETURN:
+				StartSelectedStage();
+				break;
+			case VK_ESCAPE:
+				::PostQuitMessage(0);
+				break;
+			default:
+				break;
+			}
+			break;
+		}
+
 		switch (wParam)
 		{
 			// F1키를 누르면 1인칭 카메라, F2키를 누르면 스페이스-쉽 카메라, F3키를 누르면 3인칭 카메라로 변경
 		case VK_F1:
 		case VK_F2:
 		case VK_F3:
-			if (m_pPlayer) m_pCamera = m_pPlayer->ChangeCamera((wParam - VK_F1 + 1),
+			if (m_pPlayer) m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1),
 				m_GameTimer.GetTimeElapsed());
 			break;
 		case VK_ESCAPE:
@@ -465,6 +541,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 
 void CGameFramework::ProcessInput()
 {
+	if (m_nGameStage == GAME_STAGE_START) return;
 	static UCHAR pKeyBuffer[256];
 	DWORD dwDirection = 0;
 
@@ -578,6 +655,7 @@ void CGameFramework::ProcessInput()
 
 void CGameFramework::AnimateObjects()
 {
+	if (m_nGameStage == GAME_STAGE_START) return;
 	// 게임 씬에 생성된 게임 오브젝트를 애니메이션
 	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed(), m_pPlayer);
 }
@@ -642,6 +720,16 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE,
 		&d3dDsvCPUDescriptorHandle);
 
+	if ((m_nGameStage == GAME_STAGE_START) && m_pCamera)
+	{
+		m_pCamera->GenerateViewMatrix(
+			XMFLOAT3(150.0f, 50.0f, -650.0f),
+			XMFLOAT3(150.0f, 50.0f, 360.0f),
+			XMFLOAT3(0.0f, 1.0f, 0.0f)
+		);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 30.0f);
+	}
+
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 	//3인칭 카메라일 때 플레이어가 항상 보이도록 렌더링한다.
@@ -651,7 +739,7 @@ void CGameFramework::FrameAdvance()
 		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
 	//3인칭 카메라일 때 플레이어를 렌더링한다.
-	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	if ((m_nGameStage != GAME_STAGE_START) && m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	// 현재 렌더 타겟에 대한 렌더링이 끝나기를 기다림
 	// GPU가 렌더 타겟(버퍼)을 더 이상 사용하지 않으면
@@ -681,10 +769,20 @@ void CGameFramework::FrameAdvance()
 
 	// GetTimer에게 프레임 레이트를 계산하도록 하고, 프레임 레이트를 문자열로 변환하여 주 윈도우의 캡션에 출력
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-	::SetWindowText(m_hWnd, m_pszFrameRate);
+	if (m_nGameStage == GAME_STAGE_START)
+	{
+		if (m_nSelectedStage == GAME_STAGE_1)
+			::SetWindowText(m_hWnd, _T("Stage 0 - Bottom buttons: left Stage 1, middle Start, right Stage 2"));
+		else
+			::SetWindowText(m_hWnd, _T("Stage 0 - Stage 2 selected but not built yet. Left button selects Stage 1."));
+	}
+	else
+	{
+		::SetWindowText(m_hWnd, m_pszFrameRate);
+	}
 
 	// 게임 오버, 게임 클리어가 아닐 때 충돌 검사
-	if (!m_pScene->IsGameOver() && !m_pScene->IsGameClear())
+	if ((m_nGameStage != GAME_STAGE_START) && !m_pScene->IsGameOver() && !m_pScene->IsGameClear())
 	{
 		if (m_pScene->CheckEnemyCollision(m_pPlayer))
 		{
@@ -754,5 +852,32 @@ void CGameFramework::MoveToNextFrame()
 	{
 		hResult = m_pd3dFence->SetEventOnCompletion(nFenceValue, m_hFenceEvent);
 		::WaitForSingleObject(m_hFenceEvent, INFINITE);
+	}
+}
+void CGameFramework::StartSelectedStage()
+{
+	if (m_nSelectedStage == GAME_STAGE_2)
+	{
+		return;
+	}
+
+	m_nGameStage = m_nSelectedStage;
+	m_fBulletCooldown = 0.0f;
+
+	if (m_pScene)
+	{
+		m_pScene->SetStartStage(false);
+		m_pScene->SetSelectedStage(m_nSelectedStage);
+	}
+
+	if (m_pPlayer)
+	{
+		XMFLOAT3 xmf3StartPosition = XMFLOAT3(150.0f, 60.0f, 150.0f);
+		XMFLOAT3 xmf3ZeroVelocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_pPlayer->SetPosition(xmf3StartPosition);
+		m_pPlayer->SetVelocity(xmf3ZeroVelocity);
+				m_pCamera = m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
+		m_pCamera = m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+		m_pPlayer->Update(0.0f);
 	}
 }

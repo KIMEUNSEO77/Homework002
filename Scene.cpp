@@ -71,7 +71,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	for (int i = 0; i < m_nShaders; i++)
 	{
-		m_pShaders[i].Render(pd3dCommandList, pCamera, m_bGameOver, m_bGameClear);
+		m_pShaders[i].Render(pd3dCommandList, pCamera, m_bGameOver, m_bGameClear, m_bStartStage, m_nSelectedStage);
 	}
 }
 
