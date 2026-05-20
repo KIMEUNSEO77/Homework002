@@ -724,6 +724,7 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE,
 		&d3dDsvCPUDescriptorHandle);
 
+	// 카메라 뷰 행렬, 투영 행렬 갱신
 	if ((m_nGameStage == GAME_STAGE_START) && m_pCamera)
 	{
 		m_pCamera->GenerateViewMatrix(
@@ -733,7 +734,7 @@ void CGameFramework::FrameAdvance()
 		);
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 30.0f);
 	}
-
+	// 항공뷰
 	else if (m_bAerialView && m_pCamera)
 	{
 		m_pCamera->GenerateViewMatrix(
@@ -885,10 +886,13 @@ void CGameFramework::StartSelectedStage()
 	{
 		XMFLOAT3 xmf3StartPosition = XMFLOAT3(150.0f, 60.0f, 150.0f);
 		XMFLOAT3 xmf3ZeroVelocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
 		m_pPlayer->SetPosition(xmf3StartPosition);
 		m_pPlayer->SetVelocity(xmf3ZeroVelocity);
+
 		m_pCamera = m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
 		m_pCamera = m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+
 		m_pPlayer->Update(0.0f);
 	}
 }

@@ -422,27 +422,41 @@ void CObjectsShader::ReleaseObjects()
 		}
 		delete[] m_ppObjects;
 	}
-	for (CEnemyObject* pEnemy : m_vEnemies)
+	for (int i = 0; i < (int)m_vEnemies.size(); i++)
 	{
-		delete pEnemy;
+		delete m_vEnemies[i];
 	}
 	m_vEnemies.clear();
 
-	auto ReleaseObjectVector = [](std::vector<CGameObject*>& objects)
+	for (int i = 0; i < (int)m_vGameOverObjects.size(); i++)
 	{
-		for (CGameObject* pObject : objects)
-		{
-			delete pObject;
-		}
-		objects.clear();
-	};
+		delete m_vGameOverObjects[i];
+	}
+	m_vGameOverObjects.clear();
 
-	ReleaseObjectVector(m_vGameOverObjects);
-	ReleaseObjectVector(m_vGameClearObjects);
-	ReleaseObjectVector(m_vStartStageObjects);
-	ReleaseObjectVector(m_vStage1SelectObjects);
-	ReleaseObjectVector(m_vStage2SelectObjects);
+	for (int i = 0; i < (int)m_vGameClearObjects.size(); i++)
+	{
+		delete m_vGameClearObjects[i];
+	}
+	m_vGameClearObjects.clear();
 
+	for (int i = 0; i < (int)m_vStartStageObjects.size(); i++)
+	{
+		delete m_vStartStageObjects[i];
+	}
+	m_vStartStageObjects.clear();
+
+	for (int i = 0; i < (int)m_vStage1SelectObjects.size(); i++)
+	{
+		delete m_vStage1SelectObjects[i];
+	}
+	m_vStage1SelectObjects.clear();
+
+	for (int i = 0; i < (int)m_vStage2SelectObjects.size(); i++)
+	{
+		delete m_vStage2SelectObjects[i];
+	}
+	m_vStage2SelectObjects.clear();
 	if (m_pWallMeshStage1) m_pWallMeshStage1->Release();
 	if (m_pWallMeshStage2) m_pWallMeshStage2->Release();
 	m_pWallMeshStage1 = NULL;
@@ -541,53 +555,49 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 	}
 
 	// 죽은 적 제거
-	m_vEnemies.erase(
-		std::remove_if(m_vEnemies.begin(), m_vEnemies.end(),
-			[](CEnemyObject* pEnemy)
-			{
-				if (pEnemy && pEnemy->IsDead())
-				{
-					delete pEnemy;
-					return true;
-				}
-				return false;
-			}),
-		m_vEnemies.end()
-	);
+	for (int i = 0; i < (int)m_vEnemies.size(); )
+	{
+		CEnemyObject* pEnemy = m_vEnemies[i];
+		if (pEnemy && pEnemy->IsDead())
+		{
+			delete pEnemy;
+			m_vEnemies.erase(m_vEnemies.begin() + i);
+		}
+		else
+		{
+			i++;
+		}
+	}
 
 	// 죽은 총알 제거
-	m_vBullets.erase(
-		std::remove_if(
-			m_vBullets.begin(),
-			m_vBullets.end(),
-			[](CBulletObject* pBullet)
-			{
-				if (pBullet && pBullet->IsDead())
-				{
-					delete pBullet;
-					return true;
-				}
+	for (int i = 0; i < (int)m_vBullets.size(); )
+	{
+		CBulletObject* pBullet = m_vBullets[i];
+		if (pBullet && pBullet->IsDead())
+		{
+			delete pBullet;
+			m_vBullets.erase(m_vBullets.begin() + i);
+		}
+		else
+		{
+			i++;
+		}
+	}
 
-				return false;
-			}
-		),
-		m_vBullets.end()
-	);
-
-	m_vFragments.erase(
-		std::remove_if(m_vFragments.begin(), m_vFragments.end(),
-			[](CFragmentObject* pFragment)
-			{
-				if (pFragment && pFragment->IsDead())
-				{
-					delete pFragment;
-					return true;
-				}
-				return false;
-			}),
-		m_vFragments.end()
-	);
-
+	// 사라진 파편 제거
+	for (int i = 0; i < (int)m_vFragments.size(); )
+	{
+		CFragmentObject* pFragment = m_vFragments[i];
+		if (pFragment && pFragment->IsDead())
+		{
+			delete pFragment;
+			m_vFragments.erase(m_vFragments.begin() + i);
+		}
+		else
+		{
+			i++;
+		}
+	}
 	UpdateGun(pPlayer);
 }
 
@@ -604,39 +614,69 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 {
 	CShader::Render(pd3dCommandList, pCamera);
 
+	// 시작화면이면 시작화면 오브젝트만 그리고, 실제 게임 오브젝트는 그리지 않는다.
 	if (bStartStage)
 	{
-		for (CGameObject* pObject : m_vStartStageObjects)
+		for (int i = 0; i < (int)m_vStartStageObjects.size(); i++)
 		{
-			if (pObject) pObject->Render(pd3dCommandList, pCamera);
+			CGameObject* pObject = m_vStartStageObjects[i];
+			if (pObject)
+			{
+				pObject->Render(pd3dCommandList, pCamera);
+			}
 		}
 
-		std::vector<CGameObject*>& vSelectedObjects = (nSelectedStage == 2) ? m_vStage2SelectObjects : m_vStage1SelectObjects;
-		for (CGameObject* pObject : vSelectedObjects)
+		// 선택된 스테이지에 따라 빨간 테두리를 그릴 목록을 고른다.
+		std::vector<CGameObject*>* pvSelectedObjects = NULL;
+		if (nSelectedStage == 2)
 		{
-			if (pObject) pObject->Render(pd3dCommandList, pCamera);
+			pvSelectedObjects = &m_vStage2SelectObjects;
+		}
+		else
+		{
+			pvSelectedObjects = &m_vStage1SelectObjects;
+		}
+
+		for (int i = 0; i < (int)pvSelectedObjects->size(); i++)
+		{
+			CGameObject* pObject = (*pvSelectedObjects)[i];
+			if (pObject)
+			{
+				pObject->Render(pd3dCommandList, pCamera);
+			}
 		}
 		return;
 	}
 
+	// 게임 오버 화면이면 게임 오버 표시만 그린다.
 	if (bGameOver)
 	{
-		for (CGameObject* pObject : m_vGameOverObjects)
+		for (int i = 0; i < (int)m_vGameOverObjects.size(); i++)
 		{
-			if (pObject) pObject->Render(pd3dCommandList, pCamera);
+			CGameObject* pObject = m_vGameOverObjects[i];
+			if (pObject)
+			{
+				pObject->Render(pd3dCommandList, pCamera);
+			}
 		}
 		return;
 	}
 
+	// 게임 클리어 화면이면 게임 클리어 표시만 그린다.
 	if (bGameClear)
 	{
-		for (CGameObject* pObject : m_vGameClearObjects)
+		for (int i = 0; i < (int)m_vGameClearObjects.size(); i++)
 		{
-			if (pObject) pObject->Render(pd3dCommandList, pCamera);
+			CGameObject* pObject = m_vGameClearObjects[i];
+			if (pObject)
+			{
+				pObject->Render(pd3dCommandList, pCamera);
+			}
 		}
 		return;
 	}
 
+	// 여기부터는 실제 플레이 중에 보이는 오브젝트들이다.
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
@@ -644,13 +684,23 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
-	for (CEnemyObject* pEnemy : m_vEnemies)
+
+	for (int i = 0; i < (int)m_vEnemies.size(); i++)
 	{
-		if (pEnemy) pEnemy->Render(pd3dCommandList, pCamera);
+		CEnemyObject* pEnemy = m_vEnemies[i];
+		if (pEnemy)
+		{
+			pEnemy->Render(pd3dCommandList, pCamera);
+		}
 	}
-	for (CBulletObject* pBullet : m_vBullets)
+
+	for (int i = 0; i < (int)m_vBullets.size(); i++)
 	{
-		if (pBullet) pBullet->Render(pd3dCommandList, pCamera);
+		CBulletObject* pBullet = m_vBullets[i];
+		if (pBullet)
+		{
+			pBullet->Render(pd3dCommandList, pCamera);
+		}
 	}
 
 	if (m_pGun)
@@ -658,9 +708,13 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		m_pGun->Render(pd3dCommandList, pCamera);
 	}
 
-	for (CFragmentObject* pFragment : m_vFragments)
+	for (int i = 0; i < (int)m_vFragments.size(); i++)
 	{
-		if (pFragment) pFragment->Render(pd3dCommandList, pCamera);
+		CFragmentObject* pFragment = m_vFragments[i];
+		if (pFragment)
+		{
+			pFragment->Render(pd3dCommandList, pCamera);
+		}
 	}
 
 	// 1인칭일 때만 Crosshair 갱신 + 렌더
@@ -672,7 +726,6 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		if (m_pCrossHairV) m_pCrossHairV->Render(pd3dCommandList, pCamera);
 	}
 }
-
 // 미로 맵 만들기	, 0이면 빈 공간, 1이면 벽
 void CObjectsShader::BuildMazeMap(int nStage)
 {
@@ -754,7 +807,15 @@ void CObjectsShader::ApplyStageMap(int nStage)
 	float floorThickness = 20.0f;
 	float floorStepHeight = 20.0f;
 
-	CMesh* pFloorMesh = (nStage == 2) ? m_pFloorMeshStage2 : m_pFloorMeshStage1;
+	CMesh* pFloorMesh = NULL;
+	if (nStage == 2)
+	{
+		pFloorMesh = m_pFloorMeshStage2;
+	}
+	else
+	{
+		pFloorMesh = m_pFloorMeshStage1;
+	}
 
 	for (int z = 0; z < MAZE_Z; z++)
 	{
@@ -778,7 +839,15 @@ void CObjectsShader::ApplyStageMap(int nStage)
 	}
 
 	int wallObjectIndex = m_nWallObjectStartIndex;
-	CMesh* pWallMesh = (nStage == 2) ? m_pWallMeshStage2 : m_pWallMeshStage1;
+	CMesh* pWallMesh = NULL;
+	if (nStage == 2)
+	{
+		pWallMesh = m_pWallMeshStage2;
+	}
+	else
+	{
+		pWallMesh = m_pWallMeshStage1;
+	}
 
 	for (int z = 0; z < MAZE_Z; z++)
 	{
@@ -854,9 +923,9 @@ float CObjectsShader::GetFloorHeight(float x, float z)
 // 적 생성
 void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CCubeMeshDiffused* pEnemyMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		40.0f, 100.0f, 40.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
+	CCubeMeshDiffused* pEnemyMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
+		40.0f, 100.0f, 40.0f, 
+		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
 
 	// 적 7마리 초기 위치
@@ -1014,6 +1083,7 @@ bool CObjectsShader::CheckEnemyCollision(CPlayer* pPlayer)
 	return false;
 }
 
+// 게임 상태 UI 오브젝트 생성
 void CObjectsShader::BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CCubeMeshDiffused* pRedMesh = new CCubeMeshDiffused(
@@ -1034,7 +1104,6 @@ void CObjectsShader::BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	pOver1->SetPosition(150.0f * 5, 250.0f, 150.0f * 5);
 	pOver1->Rotate(0.0f, 0.0f, 45.0f);
 	m_vGameOverObjects.push_back(pOver1);
-
 	CGameObject* pOver2 = new CGameObject();
 	pOver2->SetMesh(pRedMesh);
 	pOver2->SetPosition(150.0f * 5, 250.0f, 150.0f * 5);
@@ -1051,150 +1120,96 @@ void CObjectsShader::BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	}
 }
 
+// 시작 화면
 void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	// 1스테이지 버튼
 	CCubeMeshDiffused* pStage1ButtonMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		100.0f, 70.0f, 34.0f,
+		pd3dDevice, pd3dCommandList, 100.0f, 70.0f, 34.0f,
 		XMFLOAT4(0.95f, 0.75f, 0.25f, 1.0f)
 	);
 
+	// 2스테이지 버튼
 	CCubeMeshDiffused* pStage2ButtonMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		100.0f, 70.0f, 34.0f,
+		pd3dDevice, pd3dCommandList, 100.0f, 70.0f, 34.0f,
 		XMFLOAT4(0.95f, 0.75f, 0.25f, 1.0f)
 	);
 
+	// 시작 버튼
 	CCubeMeshDiffused* pStartButtonMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		200.0f, 70.0f, 34.0f,
+		pd3dDevice, pd3dCommandList, 200.0f, 70.0f, 34.0f,
 		XMFLOAT4(0.35f, 0.65f, 1.0f, 1.0f)
 	);
 
+	// 1, 2 막대
 	CCubeMeshDiffused* pDigitHMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		52.0f, 8.0f, 8.0f,
+		pd3dDevice, pd3dCommandList, 52.0f, 8.0f, 8.0f,
 		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
 
 	CCubeMeshDiffused* pDigitVMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		8.0f, 32.0f, 8.0f,
+		pd3dDevice, pd3dCommandList, 8.0f, 32.0f, 8.0f,
 		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
 
+	// 김은서 막대
 	CCubeMeshDiffused* pTitleHMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		48.0f, 7.0f, 7.0f,
+		pd3dDevice, pd3dCommandList, 48.0f, 7.0f, 7.0f,
 		XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
 
 	CCubeMeshDiffused* pTitleVMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		7.0f, 48.0f, 7.0f,
+		pd3dDevice, pd3dCommandList, 7.0f, 48.0f, 7.0f,
 		XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
 
 	CCubeMeshDiffused* pTitleSmallHMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		32.0f, 7.0f, 7.0f,
+		pd3dDevice, pd3dCommandList, 32.0f, 7.0f, 7.0f,
 		XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
 
 	CCubeMeshDiffused* pTitleSmallVMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		7.0f, 32.0f, 7.0f,
+		pd3dDevice, pd3dCommandList, 7.0f, 32.0f, 7.0f,
 		XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
+
+	// START 글자를 만들 때 쓰는 빨간 가로/세로 막대
 	CCubeMeshDiffused* pLetterHMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		22.0f, 5.0f, 6.0f,
+		pd3dDevice, pd3dCommandList, 22.0f, 5.0f, 6.0f,
 		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
 
 	CCubeMeshDiffused* pLetterVMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		5.0f, 22.0f, 6.0f,
+		pd3dDevice, pd3dCommandList, 5.0f, 22.0f, 6.0f,
 		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
+
+	// 선택된 스테이지 빨간 테두리 막대
 	CCubeMeshDiffused* pBorderHMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		118.0f, 8.0f, 8.0f,
+		pd3dDevice, pd3dCommandList, 118.0f, 8.0f, 8.0f,
 		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
 
 	CCubeMeshDiffused* pBorderVMesh = new CCubeMeshDiffused(
-		pd3dDevice, pd3dCommandList,
-		8.0f, 82.0f, 8.0f,
+		pd3dDevice, pd3dCommandList, 8.0f, 82.0f, 8.0f,
 		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
 	);
 
+	// 버튼 위치
 	float buttonY = -105.0f;
 	float buttonZ = 360.0f;
 	float digitZ = 332.0f;
 
-	auto AddStartObject = [this](CMesh* pMesh, XMFLOAT3 xmf3Position)
-	{
-		CGameObject* pObject = new CGameObject();
-		pObject->SetMesh(pMesh);
-		pObject->SetPosition(xmf3Position);
-		m_vStartStageObjects.push_back(pObject);
-	};
-
-	auto AddSelectionObject = [](std::vector<CGameObject*>& vObjects, CMesh* pMesh, XMFLOAT3 xmf3Position)
-	{
-		CGameObject* pObject = new CGameObject();
-		pObject->SetMesh(pMesh);
-		pObject->SetPosition(xmf3Position);
-		vObjects.push_back(pObject);
-	};
-
+	// 제목 위치
 	float titleY = 150.0f;
 	float titleZ = 332.0f;
-	float titleHalfW = 24.0f;
 	float titleHalfH = 24.0f;
 	float titleCharStep = 112.0f;
 	float kimX = 26.0f;
 	float eunX = kimX + titleCharStep;
 	float seoX = eunX + titleCharStep;
 
-	// 김
-	AddStartObject(pTitleHMesh, XMFLOAT3(kimX - 34.0f, titleY + titleHalfH, titleZ));
-	AddStartObject(pTitleVMesh, XMFLOAT3(kimX - 10.0f, titleY + 4.0f, titleZ));
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(kimX + 22.0f, titleY + 10.0f, titleZ));
-	AddStartObject(pTitleSmallHMesh, XMFLOAT3(kimX - 22.0f, titleY - 16.0f, titleZ));
-	AddStartObject(pTitleSmallHMesh, XMFLOAT3(kimX - 22.0f, titleY - 42.0f, titleZ));
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(kimX - 38.0f, titleY - 29.0f, titleZ));
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(kimX - 6.0f, titleY - 29.0f, titleZ));
-
-	// 은
-	AddStartObject(pTitleSmallHMesh, XMFLOAT3(eunX - 20.0f, titleY + 22.0f, titleZ));
-	AddStartObject(pTitleSmallHMesh, XMFLOAT3(eunX - 20.0f, titleY - 8.0f, titleZ));
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(eunX - 36.0f, titleY + 7.0f, titleZ));
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(eunX - 4.0f, titleY + 7.0f, titleZ));
-	AddStartObject(pTitleHMesh, XMFLOAT3(eunX - 20.0f, titleY - 34.0f, titleZ));
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(eunX - 42.0f, titleY - 54.0f, titleZ));
-	AddStartObject(pTitleHMesh, XMFLOAT3(eunX - 18.0f, titleY - 68.0f, titleZ));
-
-	// 서
-	AddStartObject(pTitleSmallHMesh, XMFLOAT3(seoX - 30.0f, titleY + 22.0f, titleZ));
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(seoX - 42.0f, titleY + 6.0f, titleZ));
-	AddStartObject(pTitleSmallVMesh, XMFLOAT3(seoX - 18.0f, titleY + 6.0f, titleZ));
-	AddStartObject(pTitleVMesh, XMFLOAT3(seoX + 28.0f, titleY + 2.0f, titleZ));
-	AddStartObject(pTitleSmallHMesh, XMFLOAT3(seoX + 10.0f, titleY + 2.0f, titleZ));
-
-	AddStartObject(pStage1ButtonMesh, XMFLOAT3(-50.0f, buttonY + 20.0f, buttonZ));
-	AddStartObject(pStage2ButtonMesh, XMFLOAT3(350.0f, buttonY + 20.0f, buttonZ));
-	AddStartObject(pStartButtonMesh, XMFLOAT3(150.0f, buttonY - 20.0f, buttonZ));
-
-	AddStartObject(pDigitVMesh, XMFLOAT3(-50.0f, buttonY + 20.0f, digitZ));
-
-	AddStartObject(pDigitHMesh, XMFLOAT3(320.0f + 30.0f, buttonY + 22.0f + 20.0f, digitZ));
-	AddStartObject(pDigitVMesh, XMFLOAT3(342.0f + 30.0f, buttonY + 10.0f + 20.0f, digitZ));
-	AddStartObject(pDigitHMesh, XMFLOAT3(320.0f + 30.0f, buttonY + 20.0f, digitZ));
-	AddStartObject(pDigitVMesh, XMFLOAT3(298.0f + 30.0f, buttonY - 10.0f + 20.0f, digitZ));
-	AddStartObject(pDigitHMesh, XMFLOAT3(320.0f + 30.0f, buttonY - 22.0f + 20.0f, digitZ));
-
+	// START 위치
 	float startTextY = buttonY - 20.0f;
 	float startTextZ = 332.0f;
 	float letterTop = 13.0f;
@@ -1205,61 +1220,138 @@ void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	float letterStep = 34.0f;
 	float textStartX = 82.0f;
 
-	auto AddLetterH = [&](float cx, float cy)
-	{
-		AddStartObject(pLetterHMesh, XMFLOAT3(cx, cy, startTextZ));
-	};
-
-	auto AddLetterV = [&](float cx, float cy)
-	{
-		AddStartObject(pLetterVMesh, XMFLOAT3(cx, cy, startTextZ));
-	};
-
 	float xS = textStartX;
-	AddLetterH(xS, startTextY + letterTop);
-	AddLetterV(xS + letterLeft, startTextY + 7.0f);
-	AddLetterH(xS, startTextY + letterMid);
-	AddLetterV(xS + letterRight, startTextY - 7.0f);
-	AddLetterH(xS, startTextY + letterBottom);
-
 	float xT1 = textStartX + letterStep;
-	AddLetterH(xT1, startTextY + letterTop);
-	AddLetterV(xT1, startTextY);
-
 	float xA = textStartX + letterStep * 2.0f;
-	AddLetterH(xA, startTextY + letterTop);
-	AddLetterH(xA, startTextY + letterMid);
-	AddLetterV(xA + letterLeft, startTextY);
-	AddLetterV(xA + letterRight, startTextY);
-
 	float xR = textStartX + letterStep * 3.0f;
-	AddLetterH(xR, startTextY + letterTop);
-	AddLetterH(xR, startTextY + letterMid);
-	AddLetterV(xR + letterLeft, startTextY);
-	AddLetterV(xR + letterRight, startTextY + 7.0f);
-	AddLetterV(xR + letterRight, startTextY - 8.0f);
-
 	float xT2 = textStartX + letterStep * 4.0f;
-	AddLetterH(xT2, startTextY + letterTop);
-	AddLetterV(xT2, startTextY);
 
+	// 어떤 Mesh를 어느 위치에 놓을지
+	struct SStartObjectInfo
+	{
+		CMesh* pMesh;
+		XMFLOAT3 xmf3Position;
+	};
+
+	SStartObjectInfo startObjects[] =
+	{
+		// 김
+		{ pTitleHMesh, XMFLOAT3(kimX - 34.0f, titleY + titleHalfH, titleZ) },
+		{ pTitleVMesh, XMFLOAT3(kimX - 10.0f, titleY + 4.0f, titleZ) },
+		{ pTitleSmallVMesh, XMFLOAT3(kimX + 22.0f, titleY + 10.0f, titleZ) },
+		{ pTitleSmallHMesh, XMFLOAT3(kimX - 22.0f, titleY - 16.0f, titleZ) },
+		{ pTitleSmallHMesh, XMFLOAT3(kimX - 22.0f, titleY - 42.0f, titleZ) },
+		{ pTitleSmallVMesh, XMFLOAT3(kimX - 38.0f, titleY - 29.0f, titleZ) },
+		{ pTitleSmallVMesh, XMFLOAT3(kimX - 6.0f, titleY - 29.0f, titleZ) },
+
+		// 은
+		{ pTitleSmallHMesh, XMFLOAT3(eunX - 20.0f, titleY + 22.0f, titleZ) },
+		{ pTitleSmallHMesh, XMFLOAT3(eunX - 20.0f, titleY - 8.0f, titleZ) },
+		{ pTitleSmallVMesh, XMFLOAT3(eunX - 36.0f, titleY + 7.0f, titleZ) },
+		{ pTitleSmallVMesh, XMFLOAT3(eunX - 4.0f, titleY + 7.0f, titleZ) },
+		{ pTitleHMesh, XMFLOAT3(eunX - 20.0f, titleY - 34.0f, titleZ) },
+		{ pTitleSmallVMesh, XMFLOAT3(eunX - 42.0f, titleY - 54.0f, titleZ) },
+		{ pTitleHMesh, XMFLOAT3(eunX - 18.0f, titleY - 68.0f, titleZ) },
+
+		// 서
+		{ pTitleSmallHMesh, XMFLOAT3(seoX - 30.0f, titleY + 22.0f, titleZ) },
+		{ pTitleSmallVMesh, XMFLOAT3(seoX - 42.0f, titleY + 6.0f, titleZ) },
+		{ pTitleSmallVMesh, XMFLOAT3(seoX - 18.0f, titleY + 6.0f, titleZ) },
+		{ pTitleVMesh, XMFLOAT3(seoX + 28.0f, titleY + 2.0f, titleZ) },
+		{ pTitleSmallHMesh, XMFLOAT3(seoX + 10.0f, titleY + 2.0f, titleZ) },
+
+		// 1스테이지, 2스테이지, START
+		{ pStage1ButtonMesh, XMFLOAT3(-50.0f, buttonY + 20.0f, buttonZ) },
+		{ pStage2ButtonMesh, XMFLOAT3(350.0f, buttonY + 20.0f, buttonZ) },
+		{ pStartButtonMesh, XMFLOAT3(150.0f, buttonY - 20.0f, buttonZ) },
+
+		// 1
+		{ pDigitVMesh, XMFLOAT3(-50.0f, buttonY + 20.0f, digitZ) },
+
+		// 2
+		{ pDigitHMesh, XMFLOAT3(350.0f, buttonY + 42.0f, digitZ) },
+		{ pDigitVMesh, XMFLOAT3(372.0f, buttonY + 30.0f, digitZ) },
+		{ pDigitHMesh, XMFLOAT3(350.0f, buttonY + 20.0f, digitZ) },
+		{ pDigitVMesh, XMFLOAT3(328.0f, buttonY + 10.0f, digitZ) },
+		{ pDigitHMesh, XMFLOAT3(350.0f, buttonY - 2.0f, digitZ) },
+
+		// S
+		{ pLetterHMesh, XMFLOAT3(xS, startTextY + letterTop, startTextZ) },
+		{ pLetterVMesh, XMFLOAT3(xS + letterLeft, startTextY + 7.0f, startTextZ) },
+		{ pLetterHMesh, XMFLOAT3(xS, startTextY + letterMid, startTextZ) },
+		{ pLetterVMesh, XMFLOAT3(xS + letterRight, startTextY - 7.0f, startTextZ) },
+		{ pLetterHMesh, XMFLOAT3(xS, startTextY + letterBottom, startTextZ) },
+
+		// T
+		{ pLetterHMesh, XMFLOAT3(xT1, startTextY + letterTop, startTextZ) },
+		{ pLetterVMesh, XMFLOAT3(xT1, startTextY, startTextZ) },
+
+		// A
+		{ pLetterHMesh, XMFLOAT3(xA, startTextY + letterTop, startTextZ) },
+		{ pLetterHMesh, XMFLOAT3(xA, startTextY + letterMid, startTextZ) },
+		{ pLetterVMesh, XMFLOAT3(xA + letterLeft, startTextY, startTextZ) },
+		{ pLetterVMesh, XMFLOAT3(xA + letterRight, startTextY, startTextZ) },
+
+		// R
+		{ pLetterHMesh, XMFLOAT3(xR, startTextY + letterTop, startTextZ) },
+		{ pLetterHMesh, XMFLOAT3(xR, startTextY + letterMid, startTextZ) },
+		{ pLetterVMesh, XMFLOAT3(xR + letterLeft, startTextY, startTextZ) },
+		{ pLetterVMesh, XMFLOAT3(xR + letterRight, startTextY + 7.0f, startTextZ) },
+		{ pLetterVMesh, XMFLOAT3(xR + letterRight, startTextY - 8.0f, startTextZ) },
+
+		// T
+		{ pLetterHMesh, XMFLOAT3(xT2, startTextY + letterTop, startTextZ) },
+		{ pLetterVMesh, XMFLOAT3(xT2, startTextY, startTextZ) }
+	};
+
+	// 구조체 배열을 실제 CGameObject로 만든 뒤, 시작화면 오브젝트 배열에 넣음
+	int nStartObjectCount = sizeof(startObjects) / sizeof(startObjects[0]);
+	for (int i = 0; i < nStartObjectCount; i++)
+	{
+		CGameObject* pObject = new CGameObject();
+		pObject->SetMesh(startObjects[i].pMesh);
+		pObject->SetPosition(startObjects[i].xmf3Position);
+		m_vStartStageObjects.push_back(pObject);
+	}
+
+	// 선택된 스테이지 테두리만 Render()에서 그림
 	float borderZ = 328.0f;
 	float borderHalfWidth = 58.0f;
 	float borderHalfHeight = 40.0f;
 	XMFLOAT3 stage1Center = XMFLOAT3(-50.0f, buttonY + 20.0f, borderZ);
 	XMFLOAT3 stage2Center = XMFLOAT3(350.0f, buttonY + 20.0f, borderZ);
 
-	AddSelectionObject(m_vStage1SelectObjects, pBorderHMesh, XMFLOAT3(stage1Center.x, stage1Center.y + borderHalfHeight, borderZ));
-	AddSelectionObject(m_vStage1SelectObjects, pBorderHMesh, XMFLOAT3(stage1Center.x, stage1Center.y - borderHalfHeight, borderZ));
-	AddSelectionObject(m_vStage1SelectObjects, pBorderVMesh, XMFLOAT3(stage1Center.x - borderHalfWidth, stage1Center.y, borderZ));
-	AddSelectionObject(m_vStage1SelectObjects, pBorderVMesh, XMFLOAT3(stage1Center.x + borderHalfWidth, stage1Center.y, borderZ));
+	struct SSelectionObjectInfo
+	{
+		std::vector<CGameObject*>* pvObjects;
+		CMesh* pMesh;
+		XMFLOAT3 xmf3Position;
+	};
 
-	AddSelectionObject(m_vStage2SelectObjects, pBorderHMesh, XMFLOAT3(stage2Center.x, stage2Center.y + borderHalfHeight, borderZ));
-	AddSelectionObject(m_vStage2SelectObjects, pBorderHMesh, XMFLOAT3(stage2Center.x, stage2Center.y - borderHalfHeight, borderZ));
-	AddSelectionObject(m_vStage2SelectObjects, pBorderVMesh, XMFLOAT3(stage2Center.x - borderHalfWidth, stage2Center.y, borderZ));
-	AddSelectionObject(m_vStage2SelectObjects, pBorderVMesh, XMFLOAT3(stage2Center.x + borderHalfWidth, stage2Center.y, borderZ));
+	SSelectionObjectInfo selectionObjects[] =
+	{
+		// 1스테이지 선택 테두리: 위, 아래, 왼쪽, 오른쪽
+		{ &m_vStage1SelectObjects, pBorderHMesh, XMFLOAT3(stage1Center.x, stage1Center.y + borderHalfHeight, borderZ) },
+		{ &m_vStage1SelectObjects, pBorderHMesh, XMFLOAT3(stage1Center.x, stage1Center.y - borderHalfHeight, borderZ) },
+		{ &m_vStage1SelectObjects, pBorderVMesh, XMFLOAT3(stage1Center.x - borderHalfWidth, stage1Center.y, borderZ) },
+		{ &m_vStage1SelectObjects, pBorderVMesh, XMFLOAT3(stage1Center.x + borderHalfWidth, stage1Center.y, borderZ) },
+
+		// 2스테이지 선택 테두리: 위, 아래, 왼쪽, 오른쪽
+		{ &m_vStage2SelectObjects, pBorderHMesh, XMFLOAT3(stage2Center.x, stage2Center.y + borderHalfHeight, borderZ) },
+		{ &m_vStage2SelectObjects, pBorderHMesh, XMFLOAT3(stage2Center.x, stage2Center.y - borderHalfHeight, borderZ) },
+		{ &m_vStage2SelectObjects, pBorderVMesh, XMFLOAT3(stage2Center.x - borderHalfWidth, stage2Center.y, borderZ) },
+		{ &m_vStage2SelectObjects, pBorderVMesh, XMFLOAT3(stage2Center.x + borderHalfWidth, stage2Center.y, borderZ) }
+	};
+
+	int nSelectionObjectCount = sizeof(selectionObjects) / sizeof(selectionObjects[0]);
+	for (int i = 0; i < nSelectionObjectCount; i++)
+	{
+		CGameObject* pObject = new CGameObject();
+		pObject->SetMesh(selectionObjects[i].pMesh);
+		pObject->SetPosition(selectionObjects[i].xmf3Position);
+		selectionObjects[i].pvObjects->push_back(pObject);
+	}
 }
-
 void CObjectsShader::SetResultObjectPosition(CPlayer* pPlayer)
 {
 	if (!pPlayer) return;
