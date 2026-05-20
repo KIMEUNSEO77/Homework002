@@ -162,6 +162,11 @@ bool CScene::CheckGoalCollision(CPlayer* pPlayer)
 	return m_pShaders && m_pShaders->CheckGoalCollision(pPlayer);
 }
 
+void CScene::SetCurrentStage(int nStage)
+{
+	m_nSelectedStage = nStage;
+	if (m_pShaders) m_pShaders->ApplyStageMap(nStage);
+}
 void CScene::SetResultObjectPosition(CPlayer* pPlayer)
 {
 	if (m_pShaders)

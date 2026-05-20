@@ -75,6 +75,7 @@ private:
 	float m_fBulletCooldown = 0.0f;  // ÃÑ¾Ë ¹ß»ç ÄðÅ¸ÀÓ
 	int m_nGameStage = GAME_STAGE_START;
 	int m_nSelectedStage = GAME_STAGE_1;
+	bool m_bAerialView = false;
 public:
 	CCamera* m_pCamera = NULL;
 

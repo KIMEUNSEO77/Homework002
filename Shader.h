@@ -100,7 +100,10 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, 
 		bool bGameOver, bool bGameClear, bool bStartStage, int nSelectedStage);
 
-	void BuildMazeMap();   // 미로 만들기
+	void BuildMazeMap(int nStage = 1);   // 미로 만들기
+	void BuildStage1MazeMap();
+	void BuildStage2MazeMap();
+	void ApplyStageMap(int nStage);
 	void BuildFloorMap();
 
 	// 충돌 검사
@@ -124,10 +127,17 @@ public:
 protected:
 	CGameObject** m_ppObjects = NULL;  // 쉐이더 객체가 오브젝트 배열 관리
 	int m_nObjects = 0;
+	int m_nWallObjectStartIndex = 0;
+	int m_nWallObjectCount = 0;
 
 	CGameObject* m_pGun = NULL;
 	CCubeMeshDiffused* m_pBulletMesh = NULL;
 	CMesh* m_pFragmentMesh = NULL;
+
+	CMesh* m_pWallMeshStage1 = NULL;
+	CMesh* m_pWallMeshStage2 = NULL;
+	CMesh* m_pFloorMeshStage1 = NULL;
+	CMesh* m_pFloorMeshStage2 = NULL;
 
 	CGameObject* m_pCrossHairH = NULL;
 	CGameObject* m_pCrossHairV = NULL;

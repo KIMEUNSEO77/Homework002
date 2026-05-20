@@ -281,8 +281,16 @@ void CObjectsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 육면체 벽 메쉬 생성
-	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 
+	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
 		150.0f, 100.0f, 150.0f, XMFLOAT4(0.7f, 0.9f, 1.0f, 1.0f));
+	CCubeMeshDiffused* pStage2WallMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
+		150.0f, 100.0f, 150.0f, XMFLOAT4(1.0f, 0.8f, 0.6f, 1.0f));
+
+	m_pWallMeshStage1 = pCubeMesh;
+	m_pWallMeshStage2 = pStage2WallMesh;
+	m_pWallMeshStage1->AddRef();
+	m_pWallMeshStage2->AddRef();
+
 	// 도착 지점 메쉬 생성
 	CCubeMeshDiffused* pGoalMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f, 
 		XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
@@ -293,8 +301,14 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	float floorStepHeight = 20.0f;
 
 	// 바닥 메쉬 생성
-	CCubeMeshDiffused* pFloorMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 
+	CCubeMeshDiffused* pFloorMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
 		150.0f, floorThickness, 150.0f, XMFLOAT4(1.0f, 0.8f, 0.6f, 1.0f));
+	CCubeMeshDiffused* pStage2FloorMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
+		150.0f, floorThickness, 150.0f, XMFLOAT4(0.7f, 0.9f, 1.0f, 1.0f));
+	m_pFloorMeshStage1 = pFloorMesh;
+	m_pFloorMeshStage2 = pStage2FloorMesh;
+	m_pFloorMeshStage1->AddRef();
+	m_pFloorMeshStage2->AddRef();
 
 	BuildMazeMap();   // 미로 생성
 	BuildFloorMap();  // 바닥 생성
@@ -342,6 +356,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	}
 
 	// 벽 생성
+	m_nWallObjectStartIndex = i;
 	for (int z = 0; z < MAZE_Z; z++)
 	{
 		for (int x = 0; x < MAZE_X; x++)
@@ -376,6 +391,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		}
 	}
 
+
+	m_nWallObjectCount = i - m_nWallObjectStartIndex;
 
 	// 도착 지점 큐브
 	CGameObject* pGoal = new CGameObject();
@@ -425,6 +442,11 @@ void CObjectsShader::ReleaseObjects()
 	ReleaseObjectVector(m_vStartStageObjects);
 	ReleaseObjectVector(m_vStage1SelectObjects);
 	ReleaseObjectVector(m_vStage2SelectObjects);
+
+	if (m_pWallMeshStage1) m_pWallMeshStage1->Release();
+	if (m_pWallMeshStage2) m_pWallMeshStage2->Release();
+	m_pWallMeshStage1 = NULL;
+	m_pWallMeshStage2 = NULL;
 }
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
@@ -461,30 +483,18 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 			XMFLOAT3 oldPos = pEnemy->GetPosition();
 
 			// X축 이동
-			pEnemy->SetPosition(
-				oldPos.x + move.x,
-				oldPos.y,
-				oldPos.z
-			);
+			pEnemy->SetPosition(oldPos.x + move.x, oldPos.y, oldPos.z);
 
 			if (CheckObjectCollision(pEnemy))
-			{
 				pEnemy->SetPosition(oldPos);
-			}
 
 			// Z축 이동
 			oldPos = pEnemy->GetPosition();
 
-			pEnemy->SetPosition(
-				oldPos.x,
-				oldPos.y,
-				oldPos.z + move.z
-			);
+			pEnemy->SetPosition(oldPos.x, oldPos.y, oldPos.z + move.z);
 
 			if (CheckObjectCollision(pEnemy))
-			{
 				pEnemy->SetPosition(oldPos);
-			}
 
 			// 바닥 단차 맞추기
 			enemyPos = pEnemy->GetPosition();
@@ -664,7 +674,15 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 }
 
 // 미로 맵 만들기	, 0이면 빈 공간, 1이면 벽
-void CObjectsShader::BuildMazeMap()
+void CObjectsShader::BuildMazeMap(int nStage)
+{
+	if (nStage == 2)
+		BuildStage2MazeMap();
+	else
+		BuildStage1MazeMap();
+}
+
+void CObjectsShader::BuildStage1MazeMap()
 {
 	int maze[MAZE_Z][MAZE_X] =
 	{
@@ -678,6 +696,26 @@ void CObjectsShader::BuildMazeMap()
 		{1,0,0,0,1,0,0,0,0,0,1},
 		{1,0,1,1,1,1,1,1,1,0,1},
 		{1,0,0,0,0,0,0,0,0,0,1},
+		{1,1,1,1,1,1,1,1,1,1,1}
+	};
+
+	memcpy(m_Maze, maze, sizeof(maze));
+}
+
+void CObjectsShader::BuildStage2MazeMap()
+{
+	int maze[MAZE_Z][MAZE_X] =
+	{
+		{1,1,1,1,1,1,1,1,1,1,1},
+		{1,0,0,0,1,0,0,0,0,0,1},
+		{1,0,1,0,1,0,1,1,1,0,1},
+		{1,0,1,0,0,0,0,0,1,0,1},
+		{1,0,1,1,1,1,1,0,1,0,1},
+		{1,0,0,0,0,0,1,0,0,0,1},
+		{1,1,1,1,1,0,1,0,1,0,1},
+		{1,0,0,0,1,0,0,0,1,0,1},
+		{1,0,1,0,1,0,1,0,1,0,1},
+		{1,0,1,0,0,0,0,0,0,0,1},
 		{1,1,1,1,1,1,1,1,1,1,1}
 	};
 
@@ -703,6 +741,73 @@ void CObjectsShader::BuildFloorMap()
 	};
 
 	memcpy(m_Floor, floor, sizeof(floor));
+}
+
+void CObjectsShader::ApplyStageMap(int nStage)
+{
+	BuildMazeMap(nStage);
+
+	const int wallHeight = 3;
+	float fxPitch = 150.0f;
+	float fyPitch = 100.0f;
+	float fzPitch = 150.0f;
+	float floorThickness = 20.0f;
+	float floorStepHeight = 20.0f;
+
+	CMesh* pFloorMesh = (nStage == 2) ? m_pFloorMeshStage2 : m_pFloorMeshStage1;
+
+	for (int z = 0; z < MAZE_Z; z++)
+	{
+		for (int x = 0; x < MAZE_X; x++)
+		{
+			int objectIndex = z * MAZE_X + x;
+			if (!m_ppObjects[objectIndex]) continue;
+
+			m_ppObjects[objectIndex]->SetMesh(pFloorMesh);
+
+			float floorY = 0.0f;
+			if (m_Maze[z][x] == 0)
+				floorY = m_Floor[z][x] * floorStepHeight;
+
+			m_ppObjects[objectIndex]->SetPosition(
+				fxPitch * x,
+				floorY - floorThickness * 0.5f,
+				fzPitch * z
+			);
+		}
+	}
+
+	int wallObjectIndex = m_nWallObjectStartIndex;
+	CMesh* pWallMesh = (nStage == 2) ? m_pWallMeshStage2 : m_pWallMeshStage1;
+
+	for (int z = 0; z < MAZE_Z; z++)
+	{
+		for (int x = 0; x < MAZE_X; x++)
+		{
+			if (m_Maze[z][x] != 1) continue;
+
+			for (int y = 0; y < wallHeight; y++)
+			{
+				if (wallObjectIndex >= (m_nWallObjectStartIndex + m_nWallObjectCount)) return;
+				if (!m_ppObjects[wallObjectIndex]) continue;
+
+				CGameObject* pWall = m_ppObjects[wallObjectIndex++];
+				pWall->SetMesh(pWallMesh);
+				pWall->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
+				pWall->SetBoundingBox(
+					XMFLOAT3(fxPitch * x, fyPitch * y, fzPitch * z),
+					XMFLOAT3(75.0f, 50.0f, 75.0f)
+				);
+			}
+		}
+	}
+
+	int goalIndex = m_nWallObjectStartIndex + m_nWallObjectCount;
+	if (goalIndex < m_nObjects && m_ppObjects[goalIndex])
+	{
+		float goalY = m_Floor[9][9] * floorStepHeight;
+		m_ppObjects[goalIndex]->SetPosition(fxPitch * 9, goalY + 6.0f, fzPitch * 9);
+	}
 }
 
 // 충돌 검사 함수
@@ -923,7 +1028,7 @@ void CObjectsShader::BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 		XMFLOAT4(0.7f, 0.9f, 1.0f, 1.0f)
 	);
 
-	// GAME OVER 느낌: 빨간 X
+	// GAME OVER: 빨간 X
 	CGameObject* pOver1 = new CGameObject();
 	pOver1->SetMesh(pRedMesh);
 	pOver1->SetPosition(150.0f * 5, 250.0f, 150.0f * 5);
@@ -936,7 +1041,7 @@ void CObjectsShader::BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	pOver2->Rotate(0.0f, 0.0f, -45.0f);
 	m_vGameOverObjects.push_back(pOver2);
 
-	// GAME CLEAR 느낌: 파란 막대 3개
+	// GAME CLEAR: 파란 막대 3개
 	for (int i = 0; i < 3; i++)
 	{
 		CGameObject* pClear = new CGameObject();
@@ -1179,9 +1284,7 @@ void CObjectsShader::SetResultObjectPosition(CPlayer* pPlayer)
 	}
 }
 
-void CObjectsShader::BuildCrossHair(
-	ID3D12Device* pd3dDevice,
-	ID3D12GraphicsCommandList* pd3dCommandList)
+void CObjectsShader::BuildCrossHair(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CCubeMeshDiffused* pHMesh = new CCubeMeshDiffused(
 		pd3dDevice,

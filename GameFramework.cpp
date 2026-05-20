@@ -411,21 +411,21 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			int nStage2Right = m_nWndClientWidth * 82 / 100;
 
 			if ((y >= nStageButtonTop) && (y <= nStageButtonBottom) &&
-				(x >= nStage1Left) && (x <= nStage1Right))
+		(x >= nStage1Left) && (x <= nStage1Right))
 			{
-				m_nSelectedStage = GAME_STAGE_1;
-				if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
+		m_nSelectedStage = GAME_STAGE_1;
+		if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
 			}
 			else if ((y >= nStartButtonTop) && (y <= nStartButtonBottom) &&
-				(x >= nStartLeft) && (x <= nStartRight))
+		(x >= nStartLeft) && (x <= nStartRight))
 			{
-				StartSelectedStage();
+		StartSelectedStage();
 			}
 			else if ((y >= nStageButtonTop) && (y <= nStageButtonBottom) &&
-				(x >= nStage2Left) && (x <= nStage2Right))
+		(x >= nStage2Left) && (x <= nStage2Right))
 			{
-				m_nSelectedStage = GAME_STAGE_2;
-				if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
+		m_nSelectedStage = GAME_STAGE_2;
+		if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
 			}
 
 			return;
@@ -464,22 +464,22 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			{
 			case '1':
 			case VK_LEFT:
-				m_nSelectedStage = GAME_STAGE_1;
-				if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
-				break;
+		m_nSelectedStage = GAME_STAGE_1;
+		if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
+		break;
 			case '2':
 			case VK_RIGHT:
-				m_nSelectedStage = GAME_STAGE_2;
-				if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
-				break;
+		m_nSelectedStage = GAME_STAGE_2;
+		if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
+		break;
 			case VK_RETURN:
-				StartSelectedStage();
-				break;
+		StartSelectedStage();
+		break;
 			case VK_ESCAPE:
-				::PostQuitMessage(0);
-				break;
+		::PostQuitMessage(0);
+		break;
 			default:
-				break;
+		break;
 			}
 			break;
 		}
@@ -490,8 +490,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_F1:
 		case VK_F2:
 		case VK_F3:
+			m_bAerialView = false;
 			if (m_pPlayer) m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1),
-				m_GameTimer.GetTimeElapsed());
+		m_GameTimer.GetTimeElapsed());
+			break;
+		case VK_F4:
+			m_bAerialView = true;
 			break;
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
@@ -598,9 +602,9 @@ void CGameFramework::ProcessInput()
 			/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우
 			cxDelta는 z-축의 회전을 나타낸다.*/
 			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+		m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
 			else
-				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+		m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 		}
 		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다). 이동 거리는 시간에 비례하도록 한다.
 		플레이어의 이동 속력은 (50/초)로 가정한다.*/
@@ -619,12 +623,12 @@ void CGameFramework::ProcessInput()
 			XMFLOAT3 xmf3NewPosition = m_pPlayer->GetPosition();
 
 			m_pPlayer->Move(
-				XMFLOAT3(
-					xmf3OldPosition.x - xmf3NewPosition.x,
-					0.0f,
-					xmf3OldPosition.z - xmf3NewPosition.z
-				),
-				false
+		XMFLOAT3(
+			xmf3OldPosition.x - xmf3NewPosition.x,
+			0.0f,
+			xmf3OldPosition.z - xmf3NewPosition.z
+		),
+		false
 			);
 
 			XMFLOAT3 v = m_pPlayer->GetVelocity();
@@ -728,6 +732,16 @@ void CGameFramework::FrameAdvance()
 			XMFLOAT3(0.0f, 1.0f, 0.0f)
 		);
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 30.0f);
+	}
+
+	else if (m_bAerialView && m_pCamera)
+	{
+		m_pCamera->GenerateViewMatrix(
+			XMFLOAT3(750.0f, 2200.0f, 750.0f),
+			XMFLOAT3(750.0f, 0.0f, 750.0f),
+			XMFLOAT3(0.0f, 0.0f, 1.0f)
+		);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 55.0f);
 	}
 
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
@@ -856,16 +870,13 @@ void CGameFramework::MoveToNextFrame()
 }
 void CGameFramework::StartSelectedStage()
 {
-	if (m_nSelectedStage == GAME_STAGE_2)
-	{
-		return;
-	}
-
 	m_nGameStage = m_nSelectedStage;
+	m_bAerialView = false;
 	m_fBulletCooldown = 0.0f;
 
 	if (m_pScene)
 	{
+		m_pScene->SetCurrentStage(m_nSelectedStage);
 		m_pScene->SetStartStage(false);
 		m_pScene->SetSelectedStage(m_nSelectedStage);
 	}
@@ -876,7 +887,7 @@ void CGameFramework::StartSelectedStage()
 		XMFLOAT3 xmf3ZeroVelocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		m_pPlayer->SetPosition(xmf3StartPosition);
 		m_pPlayer->SetVelocity(xmf3ZeroVelocity);
-				m_pCamera = m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
+		m_pCamera = m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
 		m_pCamera = m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 		m_pPlayer->Update(0.0f);
 	}

@@ -39,6 +39,7 @@ public:
 
 	void SetStartStage(bool bStartStage) { m_bStartStage = bStartStage; }
 	void SetSelectedStage(int nSelectedStage) { m_nSelectedStage = nSelectedStage; }
+	void SetCurrentStage(int nStage);
 
 	bool CheckEnemyCollision(CPlayer* pPlayer);
 	bool CheckGoalCollision(CPlayer* pPlayer);
