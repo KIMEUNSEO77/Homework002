@@ -280,7 +280,7 @@ void CObjectsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 // 쉐이더 내의 오브젝트들 생성
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	// 육면체 벽 메쉬 생성
+	// 벽 메쉬 생성
 	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
 		150.0f, 100.0f, 150.0f, XMFLOAT4(0.7f, 0.9f, 1.0f, 1.0f));
 	CCubeMeshDiffused* pStage2WallMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
@@ -323,7 +323,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	const int enemyCount = 7;
 
-	// 바닥 MAZE_X * MAZE_Z개 + 벽 최대 개수 + 도착 지점 1개
 	int maxObjects = (MAZE_X * MAZE_Z) + (MAZE_X * MAZE_Z * wallHeight) + 1 + enemyCount;
 	m_ppObjects = new CGameObject * [maxObjects];
 
@@ -491,7 +490,7 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer* pPlayer)
 			// 감지 거리 밖이면 이동하지 않음
 			if (distance > detectDistance) continue;
 
-			// 적이 이동하고 싶은 방향 벡터 계산
+			// 적 이동 방향 벡터 계산
 			XMFLOAT3 move = pEnemy->GetMoveToPlayerVector(playerPos, fTimeElapsed);
 
 			XMFLOAT3 oldPos = pEnemy->GetPosition();
@@ -614,7 +613,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 {
 	CShader::Render(pd3dCommandList, pCamera);
 
-	// 시작화면이면 시작화면 오브젝트만 그리고, 실제 게임 오브젝트는 그리지 않는다.
+	// 시작화면이면 시작화면 오브젝트만 그리고, 실제 게임 오브젝트는 그리지 않음
 	if (bStartStage)
 	{
 		for (int i = 0; i < (int)m_vStartStageObjects.size(); i++)
@@ -626,7 +625,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 			}
 		}
 
-		// 선택된 스테이지에 따라 빨간 테두리를 그릴 목록을 고른다.
+		// 선택된 스테이지에 따라 빨간 테두리
 		std::vector<CGameObject*>* pvSelectedObjects = NULL;
 		if (nSelectedStage == 2)
 		{
@@ -648,7 +647,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		return;
 	}
 
-	// 게임 오버 화면이면 게임 오버 표시만 그린다.
+	// 게임 오버 화면이면 게임 오버 표시만 그림
 	if (bGameOver)
 	{
 		for (int i = 0; i < (int)m_vGameOverObjects.size(); i++)
@@ -662,7 +661,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		return;
 	}
 
-	// 게임 클리어 화면이면 게임 클리어 표시만 그린다.
+	// 게임 클리어 화면이면 게임 클리어 표시만 그림
 	if (bGameClear)
 	{
 		for (int i = 0; i < (int)m_vGameClearObjects.size(); i++)
@@ -676,7 +675,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		return;
 	}
 
-	// 여기부터는 실제 플레이 중에 보이는 오브젝트들이다.
+	// 플레이 중에 보이는 오브젝트들
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
@@ -717,7 +716,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		}
 	}
 
-	// 1인칭일 때만 Crosshair 갱신 + 렌더
+	// 1인칭일 때만 Crosshair 갱신, 렌더
 	if (pCamera && pCamera->GetMode() == FIRST_PERSON_CAMERA)
 	{
 		UpdateCrossHair(pCamera);
@@ -776,7 +775,15 @@ void CObjectsShader::BuildStage2MazeMap()
 }
 
 // 바닥 높이 만들기, 숫자가 클수록 높은 바닥
-void CObjectsShader::BuildFloorMap()
+void CObjectsShader::BuildFloorMap(int nStage)
+{
+	if (nStage == 2)
+		BuildStage2FloorMap();
+	else
+		BuildStage1FloorMap();
+}
+
+void CObjectsShader::BuildStage1FloorMap()
 {
 	int floor[MAZE_Z][MAZE_X] =
 	{
@@ -795,10 +802,30 @@ void CObjectsShader::BuildFloorMap()
 
 	memcpy(m_Floor, floor, sizeof(floor));
 }
+void CObjectsShader::BuildStage2FloorMap()
+{
+	int floor[MAZE_Z][MAZE_X] =
+	{
+		{0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,1,1,0,1,1,2,2,2,0},
+		{0,1,0,2,0,2,0,0,0,2,0},
+		{0,1,0,2,2,3,2,2,0,1,0},
+		{0,1,0,0,0,0,0,2,0,1,0},
+		{0,1,1,1,2,2,0,2,2,1,0},
+		{0,0,0,0,0,2,0,3,0,1,0},
+		{0,1,1,1,0,2,2,2,0,1,0},
+		{0,1,0,1,0,2,0,1,0,2,0},
+		{0,1,0,1,1,1,1,1,2,2,0},
+		{0,0,0,0,0,0,0,0,0,0,0}
+	};
+
+	memcpy(m_Floor, floor, sizeof(floor));
+}
 
 void CObjectsShader::ApplyStageMap(int nStage)
 {
 	BuildMazeMap(nStage);
+	BuildFloorMap(nStage);
 
 	const int wallHeight = 3;
 	float fxPitch = 150.0f;
@@ -877,8 +904,53 @@ void CObjectsShader::ApplyStageMap(int nStage)
 		float goalY = m_Floor[9][9] * floorStepHeight;
 		m_ppObjects[goalIndex]->SetPosition(fxPitch * 9, goalY + 6.0f, fzPitch * 9);
 	}
-}
 
+	// 스테이지마다 적의 시작 위치를 다르게 배치
+	XMFLOAT3 stage1EnemyPositions[] =
+	{
+		XMFLOAT3(150.0f * 1, 60.0f, 150.0f * 4),
+		XMFLOAT3(150.0f * 5, 60.0f, 150.0f * 1),
+		XMFLOAT3(150.0f * 7, 60.0f, 150.0f * 3),
+		XMFLOAT3(150.0f * 3, 60.0f, 150.0f * 5),
+		XMFLOAT3(150.0f * 5, 60.0f, 150.0f * 7),
+		XMFLOAT3(150.0f * 8, 60.0f, 150.0f * 9),
+		XMFLOAT3(150.0f * 9, 60.0f, 150.0f * 9)
+	};
+
+	XMFLOAT3 stage2EnemyPositions[] =
+	{
+		XMFLOAT3(150.0f * 9, 60.0f, 150.0f * 1),
+		XMFLOAT3(150.0f * 5, 60.0f, 150.0f * 2),
+		XMFLOAT3(150.0f * 1, 60.0f, 150.0f * 3),
+		XMFLOAT3(150.0f * 7, 60.0f, 150.0f * 4),
+		XMFLOAT3(150.0f * 3, 60.0f, 150.0f * 5),
+		XMFLOAT3(150.0f * 9, 60.0f, 150.0f * 6),
+		XMFLOAT3(150.0f * 1, 60.0f, 150.0f * 8)
+	};
+
+	XMFLOAT3* pEnemyPositions = stage1EnemyPositions;
+	int nEnemyPositionCount = sizeof(stage1EnemyPositions) / sizeof(stage1EnemyPositions[0]);
+
+	if (nStage == 2)
+	{
+		pEnemyPositions = stage2EnemyPositions;
+		nEnemyPositionCount = sizeof(stage2EnemyPositions) / sizeof(stage2EnemyPositions[0]);
+	}
+
+	for (int i = 0; i < (int)m_vEnemies.size() && i < nEnemyPositionCount; i++)
+	{
+		CEnemyObject* pEnemy = m_vEnemies[i];
+		if (!pEnemy) continue;
+
+		XMFLOAT3 enemyPosition = pEnemyPositions[i];
+		enemyPosition.y = GetFloorHeight(enemyPosition.x, enemyPosition.z) + 60.0f;
+
+		pEnemy->SetDead(false);
+		pEnemy->SetPosition(enemyPosition);
+		pEnemy->SetBoundingBox(enemyPosition, XMFLOAT3(20.0f, 50.0f, 20.0f));
+	}
+
+}
 // 충돌 검사 함수
 bool CObjectsShader::CheckObjectCollision(CGameObject* pObject)
 {
@@ -940,8 +1012,11 @@ void CObjectsShader::BuildEnemies(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		XMFLOAT3(150.0f * 9, 60.0f, 150.0f * 9)
 	};
 
-	for (auto& pos : enemyPositions)
+	int nEnemyCount = sizeof(enemyPositions) / sizeof(enemyPositions[0]);
+	for (int i = 0; i < nEnemyCount; i++)
 	{
+		XMFLOAT3 pos = enemyPositions[i];
+
 		CEnemyObject* pEnemy = new CEnemyObject();
 		pEnemy->SetMesh(pEnemyMesh);
 		pEnemy->SetPosition(pos);
@@ -1098,7 +1173,7 @@ void CObjectsShader::BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 		XMFLOAT4(0.7f, 0.9f, 1.0f, 1.0f)
 	);
 
-	// GAME OVER: 빨간 X
+	// Game Over
 	CGameObject* pOver1 = new CGameObject();
 	pOver1->SetMesh(pRedMesh);
 	pOver1->SetPosition(150.0f * 5, 250.0f, 150.0f * 5);
@@ -1110,7 +1185,7 @@ void CObjectsShader::BuildGameStateObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	pOver2->Rotate(0.0f, 0.0f, -45.0f);
 	m_vGameOverObjects.push_back(pOver2);
 
-	// GAME CLEAR: 파란 막대 3개
+	// Game Clear
 	for (int i = 0; i < 3; i++)
 	{
 		CGameObject* pClear = new CGameObject();
@@ -1173,7 +1248,7 @@ void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 		XMFLOAT4(1.0f, 0.75f, 0.85f, 1.0f)
 	);
 
-	// START 글자를 만들 때 쓰는 빨간 가로/세로 막대
+	// START 글자를 만들 때 쓰는 빨간 가로, 세로 막대
 	CCubeMeshDiffused* pLetterHMesh = new CCubeMeshDiffused(
 		pd3dDevice, pd3dCommandList, 22.0f, 5.0f, 6.0f,
 		XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)
@@ -1314,7 +1389,7 @@ void CObjectsShader::BuildStartStageObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 		m_vStartStageObjects.push_back(pObject);
 	}
 
-	// 선택된 스테이지 테두리만 Render()에서 그림
+	// 선택된 스테이지 테두리만 그림
 	float borderZ = 328.0f;
 	float borderHalfWidth = 58.0f;
 	float borderHalfHeight = 40.0f;

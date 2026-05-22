@@ -11,7 +11,7 @@
 
 class CPlayer;
 
-// 카메라 상수 버퍼를 위한 구조체 선언 (셰이더(VS)에 카메라 정보를 넘기기 위한 데이터 묶음)
+// 카메라 상수 버퍼를 위한 구조체
 struct VS_CB_CAMERA_INFO
 {
 	XMFLOAT4X4 m_xmf4x4View;  // 카메라 위치와 방향을 반영해 카메라 기준으로 세상을 다시 배치. (월드 좌표 -> 카메라 좌표)
@@ -67,9 +67,6 @@ public:
 	// 카메라 변환 행렬을 생성
 	void GenerateViewMatrix();
 	void GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up);
-	/*카메라가 여러번 회전을 하게 되면 누적된 실수 연산의 부정확성 때문에 카메라의 로컬 x-축(Right), y-축(Up), z
-	축(Look)이 서로 직교하지 않을 수 있다. 카메라의 로컬 x-축(Right), y-축(Up), z-축(Look)이 서로 직교하도록 만들
-	어준다.*/
 	void RegenerateViewMatrix();
 
 	// 투영 변환 행렬을 생성

@@ -43,7 +43,7 @@ CGameFramework::~CGameFramework()
 
 }
 
-// 응용 프로그램이 실행되어 주 윈도우가 생성되면 호출됨
+// 응용 프로그램이 실행되어 주 윈도우가 생성되면 호출
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
 	m_hInstance = hInstance;
@@ -54,7 +54,6 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateCommandQueueAndList();
 	CreateSwapChain();
 	CreateRtvAndDsvDescriptorHeaps();
-	//CreateRenderTargetView();
 	CreateDepthStencilView();
 
 	BuildObjects(); // 렌더링할 게임 오브젝트 생성
@@ -201,7 +200,6 @@ void CGameFramework::CreateDirect3DDevice()
 			__uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break; // Direct3D 디바이스 생성 시도)
 	}
 
-	// 특성 레벨 12.0을 지원하는 하드웨어 디바이스를 생성할 수 없으면 WARP 디바이스를 생성
 	if (!pd3dAdapter)
 	{
 		m_pdxgiFactory->EnumWarpAdapter(_uuidof(IDXGIAdapter1), (void**)&pd3dAdapter);
@@ -398,6 +396,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 			int x = LOWORD(lParam);
 			int y = HIWORD(lParam);
+
 			int nStageButtonTop = m_nWndClientHeight * 66 / 100;
 			int nStageButtonBottom = m_nWndClientHeight * 84 / 100;
 			int nStartButtonTop = m_nWndClientHeight * 74 / 100;
@@ -410,22 +409,20 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			int nStage2Left = m_nWndClientWidth * 61 / 100;
 			int nStage2Right = m_nWndClientWidth * 82 / 100;
 
-			if ((y >= nStageButtonTop) && (y <= nStageButtonBottom) &&
-		(x >= nStage1Left) && (x <= nStage1Right))
+			if ((y >= nStageButtonTop) && (y <= nStageButtonBottom) && (x >= nStage1Left) && (x <= nStage1Right))
 			{
-		m_nSelectedStage = GAME_STAGE_1;
-		if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
+				m_nSelectedStage = GAME_STAGE_1;
+				if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
 			}
-			else if ((y >= nStartButtonTop) && (y <= nStartButtonBottom) &&
-		(x >= nStartLeft) && (x <= nStartRight))
+
+			else if ((y >= nStartButtonTop) && (y <= nStartButtonBottom) && (x >= nStartLeft) && (x <= nStartRight))
 			{
-		StartSelectedStage();
+				StartSelectedStage();
 			}
-			else if ((y >= nStageButtonTop) && (y <= nStageButtonBottom) &&
-		(x >= nStage2Left) && (x <= nStage2Right))
+			else if ((y >= nStageButtonTop) && (y <= nStageButtonBottom) && (x >= nStage2Left) && (x <= nStage2Right))
 			{
-		m_nSelectedStage = GAME_STAGE_2;
-		if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
+				m_nSelectedStage = GAME_STAGE_2;
+				if (m_pScene) m_pScene->SetSelectedStage(m_nSelectedStage);
 			}
 
 			return;
@@ -436,7 +433,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
-		// 마우스 캡쳐를 하고 현재 마우스 위치를 가져온다.
+		// 마우스 캡쳐를 하고 현재 마우스 위치를 가져옴
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
@@ -552,17 +549,12 @@ void CGameFramework::ProcessInput()
 	m_fBulletCooldown -= m_GameTimer.GetTimeElapsed();
 	if (m_fBulletCooldown < 0.0f) m_fBulletCooldown = 0.0f;
 
-	/*키보드의 상태 정보를 반환한다. 화살표 키(‘→’, ‘←’, ‘↑’, ‘↓’)를 누르면 플레이어를 오른쪽/왼쪽(로컬 x-축), 앞/
-	뒤(로컬 z-축)로 이동한다. ‘Page Up’과 ‘Page Down’ 키를 누르면 플레이어를 위/아래(로컬 y-축)로 이동한다.*/
 	if (::GetKeyboardState(pKeyBuffer))
 	{
 		if (pKeyBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
 		if (pKeyBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
 		if (pKeyBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
 		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
-
-		if (pKeyBuffer['Q'] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeyBuffer['E'] & 0xF0) dwDirection |= DIR_DOWN;
 
 		if ((pKeyBuffer[VK_SPACE] & 0xF0) && m_fBulletCooldown <= 0.0f)
 		{
@@ -575,19 +567,15 @@ void CGameFramework::ProcessInput()
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
 
-	/*마우스를 캡쳐했으면 마우스가 얼마만큼 이동하였는 가를 계산한다. 마우스 왼쪽 또는 오른쪽 버튼이 눌러질 때의
-	메시지(WM_LBUTTONDOWN, WM_RBUTTONDOWN)를 처리할 때 마우스를 캡쳐하였다. 그러므로 마우스가 캡쳐된
-	것은 마우스 버튼이 눌려진 상태를 의미한다. 마우스 버튼이 눌려진 상태에서 마우스를 좌우 또는 상하로 움직이면 플
-	레이어를 x-축 또는 y-축으로 회전한다.*/
 	if (::GetCapture() == m_hWnd)
 	{
-		// 마우스 커서를 화면에서 없앤다(보이지 않게 한다).
+		// 마우스 커서를 화면에서 없앰
 		::SetCursor(NULL);
 
-		// 현재 마우스 커서의 위치를 가져온다.
+		// 현재 마우스 커서의 위치를 가져옴
 		::GetCursorPos(&ptCursorPos);
 
-		// 마우스 버튼이 눌린 상태에서 마우스가 움직인 양을 구한다.
+		// 마우스 버튼이 눌린 상태에서 마우스가 움직인 양을 구함
 		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
 		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
 
@@ -599,22 +587,15 @@ void CGameFramework::ProcessInput()
 	{
 		if (cxDelta || cyDelta)
 		{
-			/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우
-			cxDelta는 z-축의 회전을 나타낸다.*/
 			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-		m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
 			else
-		m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 		}
-		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다). 이동 거리는 시간에 비례하도록 한다.
-		플레이어의 이동 속력은 (50/초)로 가정한다.*/
-		//if (dwDirection) m_pPlayer->Move(dwDirection, 50.0f * m_GameTimer.GetTimeElapsed(), false);  // 임시로 false
 		XMFLOAT3 xmf3OldPosition = m_pPlayer->GetPosition();
 
 		if (dwDirection)
-		{
 			m_pPlayer->Move(dwDirection, 300.0f * m_GameTimer.GetTimeElapsed(), true);
-		}
 
 		m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 
@@ -622,20 +603,15 @@ void CGameFramework::ProcessInput()
 		{
 			XMFLOAT3 xmf3NewPosition = m_pPlayer->GetPosition();
 
-			m_pPlayer->Move(
-		XMFLOAT3(
-			xmf3OldPosition.x - xmf3NewPosition.x,
-			0.0f,
-			xmf3OldPosition.z - xmf3NewPosition.z
-		),
-		false
-			);
+			m_pPlayer->Move(XMFLOAT3(xmf3OldPosition.x - xmf3NewPosition.x, 0.0f, xmf3OldPosition.z - xmf3NewPosition.z), false);
 
 			XMFLOAT3 v = m_pPlayer->GetVelocity();
 			v.x = 0.0f;
 			v.z = 0.0f;
+
 			m_pPlayer->SetVelocity(v);
 		}
+
 		// 바닥 높이에 따라 플레이어 높이 바꾸기
 		XMFLOAT3 pos = m_pPlayer->GetPosition();
 		XMFLOAT3 look = m_pPlayer->GetLookVector();
@@ -649,12 +625,10 @@ void CGameFramework::ProcessInput()
 		float t = 20.0f * m_GameTimer.GetTimeElapsed();
 		if (t > 1.0f) t = 1.0f;
 		pos.y = pos.y + (targetY - pos.y) * t;
+
 		m_pPlayer->SetPosition(pos);
 
 	}
-
-	// 플레이어를 실제로 이동하고 카메라를 갱신. 중력과 마찰력의 영향을 속도 벡터에 적용
-	//m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
 void CGameFramework::AnimateObjects()
@@ -747,13 +721,13 @@ void CGameFramework::FrameAdvance()
 
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
-	//3인칭 카메라일 때 플레이어가 항상 보이도록 렌더링한다.
+	//3인칭 카메라일 때 플레이어가 항상 보이도록 렌더링
 #ifdef _WITH_PLAYER_TOP
-//렌더 타겟은 그대로 두고 깊이 버퍼를 1.0으로 지우고 플레이어를 렌더링하면 플레이어는 무조건 그려질 것이다.
+//렌더 타겟은 그대로 두고 깊이 버퍼를 1.0으로 지우고 플레이어를 렌더링하면 플레이어는 무조건 그려질 것
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle,
 		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
-	//3인칭 카메라일 때 플레이어를 렌더링한다.
+	//3인칭 카메라일 때 플레이어를 렌더링
 	if ((m_nGameStage != GAME_STAGE_START) && m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	// 현재 렌더 타겟에 대한 렌더링이 끝나기를 기다림
@@ -813,10 +787,10 @@ void CGameFramework::FrameAdvance()
 	}
 }
 
-// F9키가 눌려지면 윈도우 모드와 전체화면 모드의 전환을 처리하는 함수
+// F9키가 눌려지면 윈도우 모드와 전체화면 모드의 전환 처리
 void CGameFramework::ChangeSwapChainState()
 {
-	WaitForGpuComplete();  // GPU가 모든 명령을 완료할 때까지 대기(중간에 모드 전환이 일어나면 GPU가 명령을 처리할 수 없으므로)
+	WaitForGpuComplete();  // GPU가 모든 명령을 완료할 때까지 대기
 
 	BOOL bFullScreenState = FALSE;  // 현재 스왑 체인이 전체 화면 모드인지 여부를 얻어옴
 	m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);  // 전체 화면 모드인지 여부를 얻어옴

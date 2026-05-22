@@ -9,7 +9,7 @@
 #define MAZE_X 11
 #define MAZE_Z 11
 
-//게임 객체의 정보를 셰이더에게 넘겨주기 위한 구조체(상수 버퍼)이다.
+//게임 객체의 정보를 셰이더에게 넘겨주기 위한 구조체(상수 버퍼)
 struct CB_GAMEOBJECT_INFO
 {
 	XMFLOAT4X4 m_xmf4x4World;
@@ -104,7 +104,9 @@ public:
 	void BuildStage1MazeMap();
 	void BuildStage2MazeMap();
 	void ApplyStageMap(int nStage);
-	void BuildFloorMap();
+	void BuildFloorMap(int nStage = 1);
+	void BuildStage1FloorMap();
+	void BuildStage2FloorMap();
 
 	// 충돌 검사
 	bool CheckObjectCollision(CGameObject* pObject); 

@@ -62,9 +62,6 @@ private:
 	UINT64 m_nFenceValues[m_nSwapChainBuffers]; // 펜스 값 (후면 버퍼마다 현재 펜스 값을 관리하기 위해 수정
 	HANDLE m_hFenceEvent; // 펜스 이벤트 핸들
 
-	//D3D12_VIEWPORT m_d3dViewport; // 뷰포트 구조체
-	//D3D12_RECT m_d3dScissorRect; // 가위 사각형 구조체
-
 	// 게임 프레임워크에서 사용할 타이머
 	CGameTimer m_GameTimer;
 	// 프레임 레이트를 주 윈도우의 캡션에 출력하기 위한 문자열

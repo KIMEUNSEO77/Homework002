@@ -91,15 +91,14 @@ void CCamera::GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMF
 }
 
 // 카메라 변환 행렬을 생성
-// 카메라의 위치 벡터, 카메라가 바라보는 지점, 카메라의 Up 벡터(로컬 y-축 벡터)를 파라메터로 사용하는 XMMatrixLookAtLH() 함수를 사용
 void CCamera::GenerateViewMatrix()
 {
 	m_xmf4x4View = Matrix4x4::LookAtLH(m_xmf3Position, m_xmf3LookAtWorld, m_xmf3Up);
 }
 
+// 카메라의 z-축을 기준으로 카메라의 좌표축들이 직교하도록 카메라 변환 행렬을 갱신
 void CCamera::RegenerateViewMatrix()
 {
-	// 카메라의 z-축을 기준으로 카메라의 좌표축들이 직교하도록 카메라 변환 행렬을 갱신
 	// 카메라의 z-축 벡터를 정규화
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 
@@ -152,9 +151,7 @@ CSpaceShipCamera::CSpaceShipCamera(CCamera* pCamera) : CCamera(pCamera)
 	m_nMode = SPACESHIP_CAMERA;
 }
 
-// 스페이스-쉽 카메라를 플레이어의 로컬 x-축(Right), y-축(Up), z-축(Look)을 기준으로 회전하는 함수
-// 따로 회전 허용하지 않고, 플레이어와 같은 방향으로 회전하고, 카메라의 로컬 축이 바뀜 
-// 플레이어 중심 위치와 카메라 중심 위치가 다르면 플레이어 회전에 의해 카메라는 공전
+// 스페이스-쉽 카메라를 플레이어의 로컬 x-축(Right), y-축(Up), z-축(Look)을 기준으로 회전
 void CSpaceShipCamera::Rotate(float x, float y, float z)
 {
 	if (m_pPlayer && (x != 0.0f))
@@ -204,11 +201,6 @@ CFirstPersonCamera::CFirstPersonCamera(CCamera* pCamera) : CCamera(pCamera)
 	m_nMode = FIRST_PERSON_CAMERA;
 	if (pCamera)
 	{
-		/*1인칭 카메라로 변경하기 이전의 카메라가 스페이스-쉽 카메라이면 카메라의 Up 벡터를 월드좌표의 y-축이 되도록
-		한다. 이것은 스페이스-쉽 카메라의 로컬 y-축 벡터가 어떤 방향이든지 1인칭 카메라(대부분 사람인 경우)의 로컬 y
-		축 벡터가 월드좌표의 y-축이 되도록 즉, 똑바로 서있는 형태로 설정한다는 의미이다. 그리고 로컬 x-축 벡터와 로컬
-		z-축 벡터의 y-좌표가 0.0f가 되도록 한다. 이것은 다음 그림과 같이 로컬 x-축 벡터와 로컬 z-축 벡터를 xz-평면(지
-		면)으로 투영하는 것을 의미한다. 즉, 1인칭 카메라의 로컬 x-축 벡터와 로컬 z-축 벡터는 xz-평면에 평행하다.*/
 		if (pCamera->GetMode() == SPACESHIP_CAMERA)
 		{
 			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -225,7 +217,6 @@ void CFirstPersonCamera::Rotate(float x, float y, float z)
 	if (x != 0.0f)
 	{
 		// 카메라의 로컬 x-축을 기준으로 회전하는 행렬을 생성
-		// 사람의 경우 고개를 끄떡이는 동작
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
 		// 카메라의 로컬 x-축, y-축, z-축을 회전 행렬을 사용하여 회전
 		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
@@ -265,11 +256,6 @@ CThirdPersonCamera::CThirdPersonCamera(CCamera* pCamera) : CCamera(pCamera)
 	m_nMode = THIRD_PERSON_CAMERA;
 	if (pCamera)
 	{
-		/*3인칭 카메라로 변경하기 이전의 카메라가 스페이스-쉽 카메라이면 카메라의 Up 벡터를 월드좌표의 y-축이 되도록
-		한다. 이것은 스페이스-쉽 카메라의 로컬 y-축 벡터가 어떤 방향이든지 3인칭 카메라(대부분 사람인 경우)의 로컬 y
-		축 벡터가 월드좌표의 y-축이 되도록 즉, 똑바로 서있는 형태로 설정한다는 의미이다. 그리고 로컬 x-축 벡터와 로컬
-		z-축 벡터의 y-좌표가 0.0f가 되도록 한다. 이것은 로컬 x-축 벡터와 로컬 z-축 벡터를 xz-평면(지면)으로 투영하는
-		것을 의미한다. 즉, 3인칭 카메라의 로컬 x-축 벡터와 로컬 z-축 벡터는 xz-평면에 평행하다.*/
 		if (pCamera->GetMode() == SPACESHIP_CAMERA)
 		{
 			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -283,7 +269,7 @@ CThirdPersonCamera::CThirdPersonCamera(CCamera* pCamera) : CCamera(pCamera)
 
 void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
-	// 플레이어가 있으면 플레이어의 회전에 따라 3인칭 카메라도 회전해야 함
+	// 플레이어가 있으면 플레이어의 회전에 따라 3인칭 카메라도 회전
 	if (m_pPlayer)
 	{
 		XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
@@ -305,17 +291,15 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 
 		float fLength = Vector3::Length(xmf3Direction);
 		xmf3Direction = Vector3::Normalize(xmf3Direction);
-		/*3인칭 카메라의 래그(Lag)는 플레이어가 회전하더라도 카메라가 동시에 따라서 회전하지 않고 약간의 시차를 두고
-		회전하는 효과를 구현하기 위한 것이다. m_fTimeLag가 1보다 크면 fTimeLagScale이 작아지고 실제 회전(이동)이 적
-		게 일어날 것이다. m_fTimeLag가 0이 아닌 경우 fTimeElapsed를 곱하고 있으므로 3인칭 카메라는 1초의 시간동안
-		(1.0f / m_fTimeLag)의 비율만큼 플레이어의 회전을 따라가게 될 것이다.*/
+
+		// Lag
 		float fTimeLagScale = (m_fTimeLag) ? fTimeElapsed * (1.0f / m_fTimeLag) : 1.0f;
 		float fDistance = fLength * fTimeLagScale;
 		if (fDistance > fLength) fDistance = fLength;
 		if (fLength < 0.01f) fDistance = fLength;
 		if (fDistance > 0)
 		{
-			// 실제로 카메라를 회전하지 않고 이동을 한다(회전의 각도가 작은 경우 회전 이동은 선형 이동과 거의 같다).
+			// 실제로 카메라를 회전하지 않고 이동
 			m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
 			// 카메라가 플레이어를 바라보도록 
 			SetLookAt(xmf3LookAt);

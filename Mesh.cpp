@@ -48,13 +48,11 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 CTriangleMesh::CTriangleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
 {
-	// 삼각형 메쉬를 정의
+	// 삼각형 메쉬 정의
 	m_nVertices = 3;
 	m_nStride = sizeof(CDiffusedVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	// 정점(삼각형의 꼭지점)의 색상은 시계방향 순서대로 빨간색, 녹색, 파란색으로 지정
-	// RGBA(Red, Green, Blue, Alpha) 4개의 파라메터를 사용하여 색상을 표현. 각 파라메터는 0.0~1.0 사이의 실수값 가짐.
 	CDiffusedVertex pVertices[3];
 	pVertices[0] = CDiffusedVertex(XMFLOAT3(0.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 	pVertices[1] = CDiffusedVertex(XMFLOAT3(0.5f, -0.5f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
@@ -74,26 +72,15 @@ CTriangleMesh::CTriangleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
 	float fWidth, float fHeight, float fDepth, XMFLOAT4 xmf4Color) : CMesh(pd3dDevice, pd3dCommandList)
 {
-	// 직육면체는 꼭지점(정점)이 8개
 	m_nVertices = 8;
 	m_nStride = sizeof(CDiffusedVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
 
-	XMFLOAT4 topColor = XMFLOAT4(
-		min(xmf4Color.x + 0.2f, 1.0f),
-		min(xmf4Color.y + 0.2f, 1.0f),
-		min(xmf4Color.z + 0.2f, 1.0f),
-		1.0f
-	);
+	XMFLOAT4 topColor = XMFLOAT4(min(xmf4Color.x + 0.2f, 1.0f), min(xmf4Color.y + 0.2f, 1.0f), min(xmf4Color.z + 0.2f, 1.0f), 1.0f);
 
-	XMFLOAT4 bottomColor = XMFLOAT4(
-		xmf4Color.x * 0.6f,
-		xmf4Color.y * 0.6f,
-		xmf4Color.z * 0.6f,
-		1.0f
-	);
+	XMFLOAT4 bottomColor = XMFLOAT4(xmf4Color.x * 0.6f, xmf4Color.y * 0.6f, xmf4Color.z * 0.6f, 1.0f);
 
 	// 정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가짐
 	CDiffusedVertex pVertices[8];
@@ -116,9 +103,7 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	// 인덱스 버퍼는 직육면체의 6개의 면(사각형)에 대한 기하 정보를 가짐
-	// 삼각형 리스트로 직육면체를 표현할 것이므로 각 면은 2개의 삼각형을 가지고 각 삼각형은 3개의 정점이 필요
-	// 즉, 인덱스 버퍼는 전체 36(=6*2*3)개의 인덱스를 가져야 함
+
 	m_nIndices = 36;
 
 	UINT pnIndices[36];
@@ -147,12 +132,12 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
 	pnIndices[33] = 7; pnIndices[34] = 4; pnIndices[35] = 6;
 
-	// 인덱스 버퍼를 생성
+	// 인덱스 버퍼 생성
 	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,
 		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
 		&m_pd3dIndexUploadBuffer);
 
-	// 인덱스 버퍼 뷰를 생성
+	// 인덱스 버퍼 뷰 생성
 	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
@@ -170,7 +155,6 @@ CAirplaneMeshDiffused::CAirplaneMeshDiffused(ID3D12Device* pd3dDevice,
 	m_nStride = sizeof(CDiffusedVertex);
 	m_nOffset = 0;
 	m_nSlot = 0;
-	// 왜 TriangleList? TriangleStip 안쓰고?
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
